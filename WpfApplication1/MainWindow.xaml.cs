@@ -281,8 +281,6 @@ namespace WpfApplication1
             InitializeComponent();
         }
 
-
-
         private void ButtonProva_Click(object sender, RoutedEventArgs e)
         {
             label1.Content = (turn) ? "Testo di prova..." : "Ciao Mamma!!";
@@ -318,9 +316,7 @@ namespace WpfApplication1
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
-            {
                 e.Handled = true;
-            }
 
             Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
             LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
