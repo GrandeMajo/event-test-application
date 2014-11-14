@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,6 +25,9 @@ namespace WpfApplication1
         bool turn = false;
         private double widthRatio = (65535.0 / System.Windows.SystemParameters.PrimaryScreenWidth);
         private double heightRatio = (65535.0 / System.Windows.SystemParameters.PrimaryScreenHeight);
+        private ModifierKeys modifierKey = ModifierKeys.Alt;
+        private Key key = Key.Q;
+        private KeyGesture keyGesture;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -92,6 +96,8 @@ namespace WpfApplication1
             XUP         = 0x00000100
         }
 
+        public const uint KEYEVENTF_EXTENDEDKEY = 0x0001;   // If specified, the scan code was preceded by a prefix byte having the value 0xE0 (224).
+        public const uint KEYEVENTF_KEYUP = 0x0002;         // If specified, the key is being released. If not specified, the key is being depressed.
 
         enum VirtualKey : int
         {
@@ -279,6 +285,7 @@ namespace WpfApplication1
         public MainWindow()
         {
             InitializeComponent();
+            keyGesture = new KeyGesture(key, modifierKey);
         }
 
         private void ButtonProva_Click(object sender, RoutedEventArgs e)
@@ -295,10 +302,18 @@ namespace WpfApplication1
             mouse_event((int)MouseEventFlags.LEFTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlags.LEFTUP, 0, 0, 0, 0);
             */
-            mouse_event((int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE, 32767, 32767, 0, 0);
-            MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
+            //mouse_event((int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE, 32767, 32767, 0, 0);
+            //MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
             TestTextBox1.Focus();
-            keybd_event((byte)VirtualKey.KEY_A, 0, 0, 0);
+            TestTextBox1.CaretIndex = 0;
+            keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_KEYUP, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_KEYUP, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_KEYUP, 0);
+            keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_KEYUP | (int)KEYEVENTF_EXTENDEDKEY, 0);
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -328,7 +343,7 @@ namespace WpfApplication1
             LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             LogTextBox.Clear();
         }
@@ -346,12 +361,16 @@ namespace WpfApplication1
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            Key pressedKey = (e.Key == Key.System ? e.SystemKey : e.Key);
+            
+            //if (pressedKey == key && ((Keyboard.Modifiers & modifierKey) == modifierKey))
+            if (keyGesture.Matches(this, e))
+                this.Close();
 
             if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
                 e.Handled = true;
             
-            Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-            LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+            LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
         }
 
         private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -359,6 +378,7 @@ namespace WpfApplication1
             Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
             LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         }
+
 
     }
 }
