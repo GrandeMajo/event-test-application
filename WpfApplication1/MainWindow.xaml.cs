@@ -306,14 +306,14 @@ namespace WpfApplication1
             //MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
             TestTextBox1.Focus();
             TestTextBox1.CaretIndex = 0;
-            keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_KEYUP, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_KEYUP, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_KEYUP, 0);
-            keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_KEYUP | (int)KEYEVENTF_EXTENDEDKEY, 0);
+            keybd_event((byte)VirtualKey.SHIFT, 0, 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
+            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
+            keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_KEYUP, 0);
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)

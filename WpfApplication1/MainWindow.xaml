@@ -9,7 +9,7 @@
         <Button x:Name="buttonOk" Content="OK" HorizontalAlignment="Left" Margin="210,0,0,90" Width="116" Click="buttonOk_Click" Height="38" VerticalAlignment="Bottom"/>
         <TextBox x:Name="Ascissa" HorizontalAlignment="Left" Height="23" Margin="70,0,0,40" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="67"/>
         <TextBox x:Name="Ordinata" HorizontalAlignment="Left" Height="23" Margin="142,0,0,40" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="67"/>
-        <TextBox x:Name="TestTextBox1" HorizontalAlignment="Left" Height="36" Margin="70,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="161"/>
+        <TextBox x:Name="TestTextBox1" HorizontalAlignment="Left" Height="36" Margin="70,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="161" Text="maremma"/>
         <TextBox x:Name="TestTextBox2" HorizontalAlignment="Left" Height="36" Margin="236,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="161"/>
         <TextBox x:Name="LogTextBox" Margin="390,220,10,10" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
         <Button x:Name="ClearButton" Content="Pulisci" HorizontalAlignment="Right" Margin="0,195,10,0" VerticalAlignment="Top" Width="75" Click="ClearButton_Click"/>
