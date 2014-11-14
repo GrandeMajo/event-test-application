@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -281,6 +282,17 @@ namespace WpfApplication1
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         internal static extern int MapVirtualKey(int uCode, int uMapType);
 
+        public bool IsExtendedKey(KeyEventArgs e)
+        {
+            //bool isExtended = (bool)typeof(System.Windows.Input.KeyEventArgs).InvokeMember(
+            //    "IsExtendedKey",
+            //    BindingFlags.GetProperty |
+            //    BindingFlags.NonPublic |
+            //    BindingFlags.Instance,
+            //    null, e, null);
+            return (bool)typeof(System.Windows.Input.KeyEventArgs).InvokeMember("IsExtendedKey", BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance, null, e, null);
+        }
+
         
         public MainWindow()
         {
@@ -360,7 +372,7 @@ namespace WpfApplication1
         //}
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
+        {            
             Key pressedKey = (e.Key == Key.System ? e.SystemKey : e.Key);
             
             //if (pressedKey == key && ((Keyboard.Modifiers & modifierKey) == modifierKey))
@@ -370,13 +382,21 @@ namespace WpfApplication1
             if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
                 e.Handled = true;
             
-            LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
+            if (IsExtendedKey(e))
+                LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + ", is extended key\n");
+            else
+                LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
+
         }
 
         private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-            LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+
+            if (IsExtendedKey(e))
+                LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key\n");
+            else
+                LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         }
 
 
