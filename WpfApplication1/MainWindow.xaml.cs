@@ -24,6 +24,15 @@ namespace WpfApplication1
     public partial class MainWindow : Window
     {
         bool turn = false;
+
+        public const int INPUT_MOUSE = 0;
+        public const int INPUT_KEYBOARD = 1;
+        public const int INPUT_HARDWARE = 2;
+        public const uint KEYEVENTF_EXTENDEDKEY = 0x0001;   // If specified, the scan code was preceded by a prefix byte having the value 0xE0 (224).
+        public const uint KEYEVENTF_KEYUP = 0x0002;   // If specified, the key is being released. If not specified, the key is being depressed.
+        public const uint KEYEVENTF_UNICODE = 0x0004;
+        public const uint KEYEVENTF_SCANCODE = 0x0008;
+        public int INPUTSIZE = Marshal.SizeOf(typeof(INPUT));
         private double widthRatio = (65535.0 / System.Windows.SystemParameters.PrimaryScreenWidth);
         private double heightRatio = (65535.0 / System.Windows.SystemParameters.PrimaryScreenHeight);
         private ModifierKeys modifierKey = ModifierKeys.Alt;
@@ -69,7 +78,6 @@ namespace WpfApplication1
             return relativeTo.PointFromScreen(new Point(w32Mouse.X, w32Mouse.Y));
         }
 
-
         [DllImport("User32.dll")]
         private static extern bool SetCursorPos(int X, int Y);
 
@@ -96,9 +104,6 @@ namespace WpfApplication1
             XDOWN       = 0x00000080,
             XUP         = 0x00000100
         }
-
-        public const uint KEYEVENTF_EXTENDEDKEY = 0x0001;   // If specified, the scan code was preceded by a prefix byte having the value 0xE0 (224).
-        public const uint KEYEVENTF_KEYUP = 0x0002;         // If specified, the key is being released. If not specified, the key is being depressed.
 
         enum VirtualKey : int
         {
@@ -293,6 +298,61 @@ namespace WpfApplication1
             return (bool)typeof(System.Windows.Input.KeyEventArgs).InvokeMember("IsExtendedKey", BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance, null, e, null);
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEYBDINPUT
+        {
+            public ushort wVk;
+            public ushort wScan;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [SerializableAttribute]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct HARDWAREINPUT
+        {
+            public int uMsg;
+            public short wParamL;
+            public short wParamH;
+        }
+
+        [SerializableAttribute]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct INPUT
+        {
+            public int type;
+            public InputUnion iu;
+        }
+
+        [SerializableAttribute]
+        [StructLayout(LayoutKind.Explicit)]
+        public struct InputUnion
+        {
+            [FieldOffset(0)]
+            public MOUSEINPUT mi;
+            [FieldOffset(0)]
+            public KEYBDINPUT ki;
+            [FieldOffset(0)]
+            public HARDWAREINPUT hi;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetMessageExtraInfo();
         
         public MainWindow()
         {
@@ -316,6 +376,7 @@ namespace WpfApplication1
             */
             //mouse_event((int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE, 32767, 32767, 0, 0);
             //MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
+            /*
             TestTextBox1.Focus();
             TestTextBox1.CaretIndex = 0;
             keybd_event((byte)VirtualKey.SHIFT, 0, 0, 0);
@@ -326,6 +387,22 @@ namespace WpfApplication1
             keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
             keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
             keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_KEYUP, 0);
+            */
+
+            INPUT[] i = new INPUT[1];
+            i[0].type = INPUT_MOUSE;
+            i[0].iu.mi.dx = -50;
+            i[0].iu.mi.dy = 0;
+            i[0].iu.mi.mouseData = 0;
+            i[0].iu.mi.time = 0;
+            i[0].iu.mi.dwFlags = (int)MouseEventFlags.MOVE;
+            SendInput(1, i, INPUTSIZE);
+
+            i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTDOWN;
+            SendInput(1, i, INPUTSIZE);
+            
+            i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
+            SendInput(1, i, INPUTSIZE);
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
