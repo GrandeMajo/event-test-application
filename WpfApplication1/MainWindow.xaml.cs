@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -388,14 +390,14 @@ namespace WpfApplication1
             keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
             keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_KEYUP, 0);
             */
-
+            /*
             INPUT[] i = new INPUT[1];
             i[0].type = INPUT_MOUSE;
             i[0].iu.mi.dx = -50;
             i[0].iu.mi.dy = 0;
             i[0].iu.mi.mouseData = 0;
             i[0].iu.mi.time = 0;
-            i[0].iu.mi.dwFlags = (int)MouseEventFlags.MOVE;
+            i[0].iu.mi.dwFlags = (int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE;
             SendInput(1, i, INPUTSIZE);
 
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTDOWN;
@@ -403,6 +405,8 @@ namespace WpfApplication1
             
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
+            */
+
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
