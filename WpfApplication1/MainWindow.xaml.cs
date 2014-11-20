@@ -406,7 +406,13 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
+            if(string.IsNullOrEmpty(TestTextBox1.Text))
+                return;
 
+            Aes aes = Aes.Create();
+            byte[] encrypted = AESCryptography.EncryptStringToBytes_Aes(TestTextBox1.Text, aes.Key, aes.IV);
+            string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
+            LogTextBox.AppendText(decrypted);
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
