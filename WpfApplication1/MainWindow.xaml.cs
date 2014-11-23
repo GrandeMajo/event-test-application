@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfApplication1.Border;
 
 namespace WpfApplication1
 {
@@ -406,6 +407,7 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
+            /*
             if(string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
@@ -413,6 +415,10 @@ namespace WpfApplication1
             byte[] encrypted = AESCryptography.EncryptStringToBytes_Aes(TestTextBox1.Text, aes.Key, aes.IV);
             string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
             LogTextBox.AppendText(decrypted);
+            */
+            BorderWindow bw = new BorderWindow();
+            bw.Owner = this;
+            bw.Show();
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
