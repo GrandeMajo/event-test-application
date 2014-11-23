@@ -1,6 +1,6 @@
 ﻿<Window x:Class="WpfApplication1.Border.BorderWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Window1" WindowState="Maximized" WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize">
-    <Border BorderBrush="Red" BorderThickness="5"></Border>
+        Title="Window1" WindowState="Maximized" WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize" ShowInTaskbar="False" Loaded="Window_Loaded">
+    <Border x:Name="RedBorder" BorderBrush="Red" BorderThickness="5"/>
 </Window>
