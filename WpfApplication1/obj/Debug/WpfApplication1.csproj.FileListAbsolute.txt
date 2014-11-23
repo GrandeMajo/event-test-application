@@ -24,3 +24,5 @@ C:\Users\Gianluca\Source\Repos\event-test-application\WpfApplication1\obj\Debug\
 C:\Users\Gianluca\Source\Repos\event-test-application\WpfApplication1\obj\Debug\WpfApplication1.g.resources
 C:\Users\Gianluca\Source\Repos\event-test-application\WpfApplication1\obj\Debug\WpfApplication1.Properties.Resources.resources
 C:\Users\Gianluca\Source\Repos\event-test-application\WpfApplication1\obj\Debug\WpfApplication1.csproj.GenerateResource.Cache
+C:\Users\Gianluca\Source\Repos\event-test-application\WpfApplication1\obj\Debug\BorderWindow\BorderWindow.baml
+C:\Users\Gianluca\Source\Repos\event-test-application\WpfApplication1\obj\Debug\BorderWindow\BorderWindow.g.cs
