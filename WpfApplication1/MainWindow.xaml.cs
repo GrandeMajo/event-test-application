@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using WpfApplication1.Border;
 
 namespace WpfApplication1
@@ -416,9 +417,19 @@ namespace WpfApplication1
             string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
             LogTextBox.AppendText(decrypted);
             */
-            BorderWindow bw = new BorderWindow();
-            bw.Owner = this;
-            bw.Show();
+            Thread border = new Thread(() => {
+                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+                
+                BorderWindow bw = new BorderWindow();
+                bw.Closed += (snd, evnt) => Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
+                bw.Show();
+
+                System.Windows.Threading.Dispatcher.Run();
+            });
+
+            border.SetApartmentState(ApartmentState.STA);
+            border.IsBackground = true;
+            border.Start();
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
