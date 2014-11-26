@@ -408,7 +408,6 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
-            /*
             if(string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
@@ -416,7 +415,7 @@ namespace WpfApplication1
             byte[] encrypted = AESCryptography.EncryptStringToBytes_Aes(TestTextBox1.Text, aes.Key, aes.IV);
             string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
             LogTextBox.AppendText(decrypted);
-            */
+            /*
             Thread border = new Thread(() => {
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
                 
@@ -430,6 +429,7 @@ namespace WpfApplication1
             border.SetApartmentState(ApartmentState.STA);
             border.IsBackground = true;
             border.Start();
+            */
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
