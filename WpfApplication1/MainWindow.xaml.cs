@@ -380,18 +380,7 @@ namespace WpfApplication1
             */
             //mouse_event((int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE, 32767, 32767, 0, 0);
             //MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
-            /*
-            TestTextBox1.Focus();
-            TestTextBox1.CaretIndex = 0;
-            keybd_event((byte)VirtualKey.SHIFT, 0, 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | 0, 0);
-            keybd_event((byte)VirtualKey.RIGHT, 0, (int)KEYEVENTF_EXTENDEDKEY | (int)KEYEVENTF_KEYUP, 0);
-            keybd_event((byte)VirtualKey.SHIFT, 0, (int)KEYEVENTF_KEYUP, 0);
-            */
+
             /*
             INPUT[] i = new INPUT[1];
             i[0].type = INPUT_MOUSE;
@@ -415,6 +404,8 @@ namespace WpfApplication1
             byte[] encrypted = AESCryptography.EncryptStringToBytes_Aes(TestTextBox1.Text, aes.Key, aes.IV);
             string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
             LogTextBox.AppendText(decrypted);
+
+            this.WindowState = WindowState.Minimized;
             /*
             Thread border = new Thread(() => {
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
