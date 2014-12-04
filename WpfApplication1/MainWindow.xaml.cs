@@ -406,7 +406,7 @@ namespace WpfApplication1
             LogTextBox.AppendText(decrypted);
 
             //this.WindowState = WindowState.Minimized;
-            /*
+            
             Thread border = new Thread(() => {
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
                 
@@ -420,7 +420,6 @@ namespace WpfApplication1
             border.SetApartmentState(ApartmentState.STA);
             border.IsBackground = true;
             border.Start();
-             * */
             
         }
 
