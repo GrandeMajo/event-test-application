@@ -405,7 +405,7 @@ namespace WpfApplication1
             string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
             LogTextBox.AppendText(decrypted);
 
-            this.WindowState = WindowState.Minimized;
+            //this.WindowState = WindowState.Minimized;
             /*
             Thread border = new Thread(() => {
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
@@ -420,7 +420,8 @@ namespace WpfApplication1
             border.SetApartmentState(ApartmentState.STA);
             border.IsBackground = true;
             border.Start();
-            */
+             * */
+            
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
