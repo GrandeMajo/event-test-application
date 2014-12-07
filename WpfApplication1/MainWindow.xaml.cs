@@ -406,7 +406,7 @@ namespace WpfApplication1
             LogTextBox.AppendText(decrypted);
 
             //this.WindowState = WindowState.Minimized;
-            
+            /*
             Thread border = new Thread(() => {
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
                 
@@ -420,7 +420,7 @@ namespace WpfApplication1
             border.SetApartmentState(ApartmentState.STA);
             border.IsBackground = true;
             border.Start();
-            
+            */
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -482,6 +482,8 @@ namespace WpfApplication1
             else
                 LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
 
+            //LogTextBox.CaretIndex = LogTextBox.Text.Length;
+            LogTextBox.ScrollToEnd();
         }
 
         private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -492,6 +494,9 @@ namespace WpfApplication1
                 LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key\n");
             else
                 LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+            
+            //LogTextBox.CaretIndex = LogTextBox.Text.Length;
+            LogTextBox.ScrollToEnd();
         }
 
 
