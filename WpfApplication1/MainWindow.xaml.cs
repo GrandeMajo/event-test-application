@@ -405,7 +405,6 @@ namespace WpfApplication1
             string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
             LogTextBox.AppendText(decrypted);
 
-            //this.WindowState = WindowState.Minimized;
             /*
             Thread border = new Thread(() => {
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
