@@ -377,11 +377,10 @@ namespace WpfApplication1
             SetCursorPos(130, 234);
             mouse_event((int)MouseEventFlags.LEFTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlags.LEFTUP, 0, 0, 0, 0);
-            */
+            
             //mouse_event((int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE, 32767, 32767, 0, 0);
             //MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
 
-            /*
             INPUT[] i = new INPUT[1];
             i[0].type = INPUT_MOUSE;
             i[0].iu.mi.dx = -50;
@@ -400,27 +399,18 @@ namespace WpfApplication1
             if(string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
-            Aes aes = Aes.Create();
-            byte[] encrypted = AESCryptography.EncryptStringToBytes_Aes(TestTextBox1.Text, aes.Key, aes.IV);
-            string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
-            LogTextBox.AppendText(decrypted);
+            //if (Clipboard.ContainsText(TextDataFormat.Text))
+            //{
+            //    string str = Clipboard.GetText(TextDataFormat.Text);
+            //    LogTextBox.AppendText(str + "\n");
+            //}
+            //else MessageBox.Show("niente testo!");
 
-            this.WindowState = WindowState.Minimized;
-            /*
-            Thread border = new Thread(() => {
-                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
-                
-                BorderWindow bw = new BorderWindow();
-                bw.Closed += (snd, evnt) => Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
-                bw.Show();
+            IDataObject data = Clipboard.GetDataObject();
+            string[] formats = data.GetFormats();
 
-                System.Windows.Threading.Dispatcher.Run();
-            });
-
-            border.SetApartmentState(ApartmentState.STA);
-            border.IsBackground = true;
-            border.Start();
-            */
+            foreach (string format in formats)
+                LogTextBox.AppendText(format + "\n");
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -435,20 +425,20 @@ namespace WpfApplication1
         }
 
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
-                e.Handled = true;
+        //private void Window_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+        //        e.Handled = true;
 
-            Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-            LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
-        }
+        //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
+        //    LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //}
 
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-            LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
-        }
+        //private void Window_KeyUp(object sender, KeyEventArgs e)
+        //{
+        //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
+        //    LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //}
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
