@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -396,16 +398,49 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
+            
             if(string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
-            //if (Clipboard.ContainsText(TextDataFormat.Text))
+            //if (Clipboard.ContainsData("FileNameW"))
             //{
-            //    string str = Clipboard.GetText(TextDataFormat.Text);
-            //    LogTextBox.AppendText(str + "\n");
+            //    string[] files = Clipboard.GetData("FileNameW") as string[];
+            //    if (files != null)
+            //    {
+            //        foreach (string file in files)
+            //            LogTextBox.AppendText(file + "\n");
+            //    }
+            //    else MessageBox.Show("niente testo!(1)");
             //}
-            //else MessageBox.Show("niente testo!");
+            //else MessageBox.Show("niente testo!(2)");
 
+            if (Clipboard.ContainsFileDropList()) {
+                StringCollection files = Clipboard.GetFileDropList();
+                if (files != null) {
+                    foreach (string file in files) {
+                        if(Directory.Exists(file))
+                            LogTextBox.AppendText("Directory\t" + file + "\n");
+                        else
+                            LogTextBox.AppendText("File\t\t" + file + "\n");
+                    }
+                }
+                else MessageBox.Show("niente testo!(1)");
+            }
+
+            //IDataObject data = Clipboard.GetDataObject();
+            //if (data.GetDataPresent("FileNameW"))
+            //{
+            //    string[] files = data.GetData("FileNameW") as string[];
+            //    if (files != null) {
+            //        foreach (string file in files)
+            //            LogTextBox.AppendText(file + "\n");
+            //    }
+            //}
+            //else MessageBox.Show("FileNameW non presente...");
+        }
+
+        private void ClipboardButton_Click(object sender, RoutedEventArgs e)
+        {
             IDataObject data = Clipboard.GetDataObject();
             string[] formats = data.GetFormats();
 
