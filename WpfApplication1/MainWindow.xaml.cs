@@ -418,7 +418,7 @@ namespace WpfApplication1
                 StringCollection files = Clipboard.GetFileDropList();
                 if (files != null) {
                     foreach (string file in files) {
-                        if(Directory.Exists(file))
+                        if (Directory.Exists(file))
                             LogTextBox.AppendText("Directory\t" + file + "\n");
                         else
                             LogTextBox.AppendText("File\t\t" + file + "\n");
@@ -426,6 +426,13 @@ namespace WpfApplication1
                 }
                 else MessageBox.Show("niente testo!(1)");
             }
+
+            //if (Clipboard.ContainsText(TextDataFormat.UnicodeText))
+            //{
+            //    string str = Clipboard.GetText(TextDataFormat.UnicodeText);
+            //    if (str != null)
+            //        LogTextBox.AppendText(str + "\n");
+            //}
 
             //IDataObject data = Clipboard.GetDataObject();
             //if (data.GetDataPresent("FileNameW"))
@@ -446,6 +453,17 @@ namespace WpfApplication1
 
             foreach (string format in formats)
                 LogTextBox.AppendText(format + "\n");
+            
+            //  Per aggiungere un file alla Clipboard
+            //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
+
+            //if (File.Exists(file))
+            //{
+            //    Clipboard.Clear();
+            //    DataObject data = new DataObject();
+            //    data.SetData(DataFormats.FileDrop, new string[] { file });
+            //    Clipboard.SetDataObject(data);
+            //}
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
