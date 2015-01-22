@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -377,11 +379,10 @@ namespace WpfApplication1
             SetCursorPos(130, 234);
             mouse_event((int)MouseEventFlags.LEFTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlags.LEFTUP, 0, 0, 0, 0);
-            */
+            
             //mouse_event((int)MouseEventFlags.MOVE | (int)MouseEventFlags.ABSOLUTE, 32767, 32767, 0, 0);
             //MessageBox.Show(((int)VirtualKey.KEY_A).ToString("X"));
 
-            /*
             INPUT[] i = new INPUT[1];
             i[0].type = INPUT_MOUSE;
             i[0].iu.mi.dx = -50;
@@ -397,29 +398,72 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
+            
             if(string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
-            Aes aes = Aes.Create();
-            byte[] encrypted = AESCryptography.EncryptStringToBytes_Aes(TestTextBox1.Text, aes.Key, aes.IV);
-            string decrypted = AESCryptography.DecryptStringFromBytes_Aes(encrypted, aes.Key, aes.IV);
-            LogTextBox.AppendText(decrypted);
+            //if (Clipboard.ContainsData("FileNameW"))
+            //{
+            //    string[] files = Clipboard.GetData("FileNameW") as string[];
+            //    if (files != null)
+            //    {
+            //        foreach (string file in files)
+            //            LogTextBox.AppendText(file + "\n");
+            //    }
+            //    else MessageBox.Show("niente testo!(1)");
+            //}
+            //else MessageBox.Show("niente testo!(2)");
 
-            /*
-            Thread border = new Thread(() => {
-                SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
-                
-                BorderWindow bw = new BorderWindow();
-                bw.Closed += (snd, evnt) => Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
-                bw.Show();
+            if (Clipboard.ContainsFileDropList()) {
+                StringCollection files = Clipboard.GetFileDropList();
+                if (files != null) {
+                    foreach (string file in files) {
+                        if (Directory.Exists(file))
+                            LogTextBox.AppendText("Directory\t" + file + "\n");
+                        else
+                            LogTextBox.AppendText("File\t\t" + file + "\n");
+                    }
+                }
+                else MessageBox.Show("niente testo!(1)");
+            }
 
-                System.Windows.Threading.Dispatcher.Run();
-            });
+            //if (Clipboard.ContainsText(TextDataFormat.UnicodeText))
+            //{
+            //    string str = Clipboard.GetText(TextDataFormat.UnicodeText);
+            //    if (str != null)
+            //        LogTextBox.AppendText(str + "\n");
+            //}
 
-            border.SetApartmentState(ApartmentState.STA);
-            border.IsBackground = true;
-            border.Start();
-            */
+            //IDataObject data = Clipboard.GetDataObject();
+            //if (data.GetDataPresent("FileNameW"))
+            //{
+            //    string[] files = data.GetData("FileNameW") as string[];
+            //    if (files != null) {
+            //        foreach (string file in files)
+            //            LogTextBox.AppendText(file + "\n");
+            //    }
+            //}
+            //else MessageBox.Show("FileNameW non presente...");
+        }
+
+        private void ClipboardButton_Click(object sender, RoutedEventArgs e)
+        {
+            IDataObject data = Clipboard.GetDataObject();
+            string[] formats = data.GetFormats();
+
+            foreach (string format in formats)
+                LogTextBox.AppendText(format + "\n");
+            
+            //  Per aggiungere un file alla Clipboard
+            //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
+
+            //if (File.Exists(file))
+            //{
+            //    Clipboard.Clear();
+            //    DataObject data = new DataObject();
+            //    data.SetData(DataFormats.FileDrop, new string[] { file });
+            //    Clipboard.SetDataObject(data);
+            //}
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -434,20 +478,20 @@ namespace WpfApplication1
         }
 
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
-                e.Handled = true;
+        //private void Window_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+        //        e.Handled = true;
 
-            Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-            LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
-        }
+        //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
+        //    LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //}
 
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-            LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
-        }
+        //private void Window_KeyUp(object sender, KeyEventArgs e)
+        //{
+        //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
+        //    LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //}
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
@@ -481,8 +525,6 @@ namespace WpfApplication1
             else
                 LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
 
-            //LogTextBox.CaretIndex = LogTextBox.Text.Length;
-            LogTextBox.ScrollToEnd();
         }
 
         private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -493,9 +535,6 @@ namespace WpfApplication1
                 LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key\n");
             else
                 LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
-            
-            //LogTextBox.CaretIndex = LogTextBox.Text.Length;
-            LogTextBox.ScrollToEnd();
         }
 
 
