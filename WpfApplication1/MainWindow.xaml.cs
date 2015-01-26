@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -44,6 +45,7 @@ namespace WpfApplication1
         private ModifierKeys modifierKey = ModifierKeys.Alt;
         private Key key = Key.Q;
         private KeyGesture keyGesture;
+        public static string currentDirectory = Directory.GetCurrentDirectory();
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -402,36 +404,17 @@ namespace WpfApplication1
             if(string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
-            //if (Clipboard.ContainsData("FileNameW"))
-            //{
-            //    string[] files = Clipboard.GetData("FileNameW") as string[];
-            //    if (files != null)
-            //    {
-            //        foreach (string file in files)
-            //            LogTextBox.AppendText(file + "\n");
+            //if (Clipboard.ContainsFileDropList()) {
+            //    StringCollection files = Clipboard.GetFileDropList();
+            //    if (files != null) {
+            //        foreach (string file in files) {
+            //            if (Directory.Exists(file))
+            //                LogTextBox.AppendText("Directory\t" + file + "\n");
+            //            else
+            //                LogTextBox.AppendText("File\t\t" + file + "\n");
+            //        }
             //    }
             //    else MessageBox.Show("niente testo!(1)");
-            //}
-            //else MessageBox.Show("niente testo!(2)");
-
-            if (Clipboard.ContainsFileDropList()) {
-                StringCollection files = Clipboard.GetFileDropList();
-                if (files != null) {
-                    foreach (string file in files) {
-                        if (Directory.Exists(file))
-                            LogTextBox.AppendText("Directory\t" + file + "\n");
-                        else
-                            LogTextBox.AppendText("File\t\t" + file + "\n");
-                    }
-                }
-                else MessageBox.Show("niente testo!(1)");
-            }
-
-            //if (Clipboard.ContainsText(TextDataFormat.UnicodeText))
-            //{
-            //    string str = Clipboard.GetText(TextDataFormat.UnicodeText);
-            //    if (str != null)
-            //        LogTextBox.AppendText(str + "\n");
             //}
 
             //IDataObject data = Clipboard.GetDataObject();
@@ -444,6 +427,22 @@ namespace WpfApplication1
             //    }
             //}
             //else MessageBox.Show("FileNameW non presente...");
+
+            //if (Clipboard.ContainsText(TextDataFormat.Text))
+            //{
+            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            //    BinaryFormatter serializer = new BinaryFormatter();
+            //    string text = Clipboard.GetText(TextDataFormat.Text);
+            //    serializer.Serialize(fs, text);
+            //    fs.Close();
+            //}
+
+            DataObject data = (DataObject)Clipboard.GetDataObject();
+            FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            BinaryFormatter serializer = new BinaryFormatter();
+            serializer.Serialize(fs, data);
+            fs.Close();
+
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
