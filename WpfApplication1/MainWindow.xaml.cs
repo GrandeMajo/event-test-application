@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -44,6 +45,7 @@ namespace WpfApplication1
         private ModifierKeys modifierKey = ModifierKeys.Alt;
         private Key key = Key.Q;
         private KeyGesture keyGesture;
+        public static string currentDirectory = Directory.GetCurrentDirectory();
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -98,17 +100,17 @@ namespace WpfApplication1
         [Flags]
         public enum MouseEventFlags : uint
         {
-            LEFTDOWN    = 0x00000002,
-            LEFTUP      = 0x00000004,
-            MIDDLEDOWN  = 0x00000020,
-            MIDDLEUP    = 0x00000040,
-            MOVE        = 0x00000001,
-            ABSOLUTE    = 0x00008000,
-            RIGHTDOWN   = 0x00000008,
-            RIGHTUP     = 0x00000010,
-            WHEEL       = 0x00000800,
-            XDOWN       = 0x00000080,
-            XUP         = 0x00000100
+            LEFTDOWN = 0x00000002,
+            LEFTUP = 0x00000004,
+            MIDDLEDOWN = 0x00000020,
+            MIDDLEUP = 0x00000040,
+            MOVE = 0x00000001,
+            ABSOLUTE = 0x00008000,
+            RIGHTDOWN = 0x00000008,
+            RIGHTUP = 0x00000010,
+            WHEEL = 0x00000800,
+            XDOWN = 0x00000080,
+            XUP = 0x00000100
         }
 
         enum VirtualKey : int
@@ -359,7 +361,7 @@ namespace WpfApplication1
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetMessageExtraInfo();
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -368,9 +370,13 @@ namespace WpfApplication1
 
         private void ButtonProva_Click(object sender, RoutedEventArgs e)
         {
-            label1.Content = (turn) ? "Testo di prova..." : "Ciao Mamma!!";
-            turn = !turn;
-            // buttonOk.Content = "Chiudi";
+            //label1.Content = (turn) ? "Testo di prova..." : "Ciao Mamma!!";
+            //turn = !turn;
+            FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Open);
+            BinaryFormatter serializer = new BinaryFormatter();
+            MyDataObject mdo = (MyDataObject)serializer.Deserialize(fs);
+            Clipboard.SetDataObject(mdo);
+            fs.Close();
         }
 
         private void buttonOk_Click(object sender, RoutedEventArgs e)
@@ -398,40 +404,21 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
-            
-            if(string.IsNullOrEmpty(TestTextBox1.Text))
+
+            if (string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
-            //if (Clipboard.ContainsData("FileNameW"))
-            //{
-            //    string[] files = Clipboard.GetData("FileNameW") as string[];
-            //    if (files != null)
-            //    {
-            //        foreach (string file in files)
-            //            LogTextBox.AppendText(file + "\n");
+            //if (Clipboard.ContainsFileDropList()) {
+            //    StringCollection files = Clipboard.GetFileDropList();
+            //    if (files != null) {
+            //        foreach (string file in files) {
+            //            if (Directory.Exists(file))
+            //                LogTextBox.AppendText("Directory\t" + file + "\n");
+            //            else
+            //                LogTextBox.AppendText("File\t\t" + file + "\n");
+            //        }
             //    }
             //    else MessageBox.Show("niente testo!(1)");
-            //}
-            //else MessageBox.Show("niente testo!(2)");
-
-            if (Clipboard.ContainsFileDropList()) {
-                StringCollection files = Clipboard.GetFileDropList();
-                if (files != null) {
-                    foreach (string file in files) {
-                        if (Directory.Exists(file))
-                            LogTextBox.AppendText("Directory\t" + file + "\n");
-                        else
-                            LogTextBox.AppendText("File\t\t" + file + "\n");
-                    }
-                }
-                else MessageBox.Show("niente testo!(1)");
-            }
-
-            //if (Clipboard.ContainsText(TextDataFormat.UnicodeText))
-            //{
-            //    string str = Clipboard.GetText(TextDataFormat.UnicodeText);
-            //    if (str != null)
-            //        LogTextBox.AppendText(str + "\n");
             //}
 
             //IDataObject data = Clipboard.GetDataObject();
@@ -444,6 +431,44 @@ namespace WpfApplication1
             //    }
             //}
             //else MessageBox.Show("FileNameW non presente...");
+
+            //if (Clipboard.ContainsText(TextDataFormat.Text))
+            //{
+            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            //    BinaryFormatter serializer = new BinaryFormatter();
+            //    string text = Clipboard.GetText(TextDataFormat.Text);
+            //    serializer.Serialize(fs, text);
+            //    fs.Close();
+            //}
+            
+            
+            //IDataObject ido = Clipboard.GetDataObject();
+            MyDataObject mdo = new MyDataObject(Clipboard.GetDataObject());
+            string[] formats = mdo.GetFormats();
+            if (formats == null)
+                return;
+
+            //foreach (string format in formats)
+            //{
+            //    string formatName = GetFormatFromDataFormat(format);
+            //    if (!Clipboard.ContainsData(formatName)) 
+            //        MessageBox.Show("cazzo " + formatName);
+            //}
+
+            FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            BinaryFormatter serializer = new BinaryFormatter();
+            //MessageBox.Show(formats.Length.ToString());
+            //foreach (string format in formats)
+            //{
+            //    object data = Clipboard.GetData(format);
+            //    if (data != null)
+            //        serializer.Serialize(fs, data);
+            //    else
+            //        MessageBox.Show(format, format);
+            //}
+
+            serializer.Serialize(fs, mdo);
+            fs.Close();
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
@@ -453,7 +478,7 @@ namespace WpfApplication1
 
             foreach (string format in formats)
                 LogTextBox.AppendText(format + "\n");
-            
+
             //  Per aggiungere un file alla Clipboard
             //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
 
@@ -464,17 +489,6 @@ namespace WpfApplication1
             //    data.SetData(DataFormats.FileDrop, new string[] { file });
             //    Clipboard.SetDataObject(data);
             //}
-        }
-
-        private void Window_MouseMove(object sender, MouseEventArgs e)
-        {
-            Win32Point p = new Win32Point();
-            GetCursorPos(ref p);
-            // p = CorrectGetPosition(this); prende le coordinate a partire dall'angolo in alto a sinistra del Grid
-            Ascissa.Text = p.X.ToString();
-            Ordinata.Text = p.Y.ToString();
-            //Ascissa.Text = ((int)(p.X * widthRatio)).ToString();
-            //Ordinata.Text = ((int)(p.Y * heightRatio)).ToString();
         }
 
 
@@ -500,7 +514,7 @@ namespace WpfApplication1
 
         //protected override void OnPreviewKeyDown(KeyEventArgs e)
         //{
-            
+
         //    if ((Keyboard.Modifiers & ModifierKeys.Windows) == ModifierKeys.Windows)
         //    {
         //        if(e.Key == Key.Tab)
@@ -510,16 +524,16 @@ namespace WpfApplication1
         //}
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {            
+        {
             Key pressedKey = (e.Key == Key.System ? e.SystemKey : e.Key);
-            
+
             //if (pressedKey == key && ((Keyboard.Modifiers & modifierKey) == modifierKey))
             if (keyGesture.Matches(this, e))
                 this.Close();
 
             if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
                 e.Handled = true;
-            
+
             if (IsExtendedKey(e))
                 LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + ", is extended key\n");
             else
@@ -537,6 +551,53 @@ namespace WpfApplication1
                 LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         }
 
+        private string GetFormatFromDataFormat(string dataFormat)
+        {
+            switch (dataFormat)
+            {
+                case "Text":					return "Text";
+                case "UnicodeText":				return "UnicodeText";
+                case "DeviceIndependentBitmap":	return "Dib";
+                case "Bitmap":					return "Bitmap";
+                case "EnhancedMetafile":		return "EnhancedMetafile";
+                case "MetaFilePict":			return "MetafilePicture";
+                case "SymbolicLink":			return "SymbolicLink";
+                case "DataInterchangeFormat":	return "Dif";
+                case "TaggedImageFileFormat":	return "Tiff";
+                case "OEMText":					return "OemText";
+                case "Palette":					return "Palette";
+                case "PenData":					return "PenData";
+                case "RiffAudio":				return "Riff";
+                case "WaveAudio":				return "WaveAudio";
+                case "FileDrop":				return "FileDrop";
+                case "Locale":					return "Locale";
+                case "HTML Format":				return "Html";
+                case "Rich Text Format":		return "Rtf";
+                case "CSV":						return "CommaSeparatedValue";
+                case "PersistentObject":		return "Serializable";
+                case "Xaml":					return "Xaml";
+                case "XamlPackage":				return "XamlPackage";
+            }
 
+            if (dataFormat == typeof(string).FullName)
+                return "StringFormat";
+
+            return dataFormat;
+        }
+
+        //static public bool HasProperty(this Type type, string name)
+        //{
+        //    return type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Any(p => p.Name == name);
+        //}
+
+        //public bool HasProperty(this object obj, string propertyName)
+        //{
+        //    return obj.GetType().GetProperty(propertyName) != null;
+        //}
+
+        //public bool HasMethod(this object obj, string methodName)
+        //{
+        //    return obj.GetType().GetProperty(methodName) != null;
+        //} 
     }
 }
