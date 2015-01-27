@@ -440,8 +440,8 @@ namespace WpfApplication1
             //    serializer.Serialize(fs, text);
             //    fs.Close();
             //}
-            
-            
+
+
             //IDataObject ido = Clipboard.GetDataObject();
             MyDataObject mdo = new MyDataObject(Clipboard.GetDataObject());
             string[] formats = mdo.GetFormats();
@@ -489,6 +489,17 @@ namespace WpfApplication1
             //    data.SetData(DataFormats.FileDrop, new string[] { file });
             //    Clipboard.SetDataObject(data);
             //}
+        }
+
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            Win32Point p = new Win32Point();
+            GetCursorPos(ref p);
+            // p = CorrectGetPosition(this); prende le coordinate a partire dall'angolo in alto a sinistra del Grid 
+            Ascissa.Text = p.X.ToString();
+            Ordinata.Text = p.Y.ToString();
+            //Ascissa.Text = ((int)(p.X * widthRatio)).ToString(); 
+            //Ordinata.Text = ((int)(p.Y * heightRatio)).ToString(); 
         }
 
 
@@ -555,28 +566,28 @@ namespace WpfApplication1
         {
             switch (dataFormat)
             {
-                case "Text":					return "Text";
-                case "UnicodeText":				return "UnicodeText";
-                case "DeviceIndependentBitmap":	return "Dib";
-                case "Bitmap":					return "Bitmap";
-                case "EnhancedMetafile":		return "EnhancedMetafile";
-                case "MetaFilePict":			return "MetafilePicture";
-                case "SymbolicLink":			return "SymbolicLink";
-                case "DataInterchangeFormat":	return "Dif";
-                case "TaggedImageFileFormat":	return "Tiff";
-                case "OEMText":					return "OemText";
-                case "Palette":					return "Palette";
-                case "PenData":					return "PenData";
-                case "RiffAudio":				return "Riff";
-                case "WaveAudio":				return "WaveAudio";
-                case "FileDrop":				return "FileDrop";
-                case "Locale":					return "Locale";
-                case "HTML Format":				return "Html";
-                case "Rich Text Format":		return "Rtf";
-                case "CSV":						return "CommaSeparatedValue";
-                case "PersistentObject":		return "Serializable";
-                case "Xaml":					return "Xaml";
-                case "XamlPackage":				return "XamlPackage";
+                case "Text": return "Text";
+                case "UnicodeText": return "UnicodeText";
+                case "DeviceIndependentBitmap": return "Dib";
+                case "Bitmap": return "Bitmap";
+                case "EnhancedMetafile": return "EnhancedMetafile";
+                case "MetaFilePict": return "MetafilePicture";
+                case "SymbolicLink": return "SymbolicLink";
+                case "DataInterchangeFormat": return "Dif";
+                case "TaggedImageFileFormat": return "Tiff";
+                case "OEMText": return "OemText";
+                case "Palette": return "Palette";
+                case "PenData": return "PenData";
+                case "RiffAudio": return "Riff";
+                case "WaveAudio": return "WaveAudio";
+                case "FileDrop": return "FileDrop";
+                case "Locale": return "Locale";
+                case "HTML Format": return "Html";
+                case "Rich Text Format": return "Rtf";
+                case "CSV": return "CommaSeparatedValue";
+                case "PersistentObject": return "Serializable";
+                case "Xaml": return "Xaml";
+                case "XamlPackage": return "XamlPackage";
             }
 
             if (dataFormat == typeof(string).FullName)
