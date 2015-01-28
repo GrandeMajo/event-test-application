@@ -6,36 +6,36 @@ using System.Windows;
 namespace WpfApplication1
 {
 
-    [Serializable]
-    public class DataContainer : ISerializable
-    {
-        public object Data { get; set; }
+    //[Serializable]
+    //public class DataContainer : ISerializable
+    //{
+    //    public object Data { get; set; }
 
-        public DataContainer(object data)
-        {
-            Data = data;
-        }
+    //    public DataContainer(object data)
+    //    {
+    //        Data = data;
+    //    }
 
-        // Deserialization constructor
-        protected DataContainer(SerializationInfo info, StreamingContext context)
-        {
-            IntPtr address = (IntPtr)info.GetValue("dataAddress", typeof(IntPtr));
-            GCHandle handle = GCHandle.FromIntPtr(address);
-            Data = handle.Target;
-            handle.Free();
-        }
+    //    // Deserialization constructor
+    //    protected DataContainer(SerializationInfo info, StreamingContext context)
+    //    {
+    //        IntPtr address = (IntPtr)info.GetValue("dataAddress", typeof(IntPtr));
+    //        GCHandle handle = GCHandle.FromIntPtr(address);
+    //        Data = handle.Target;
+    //        handle.Free();
+    //    }
 
-        #region ISerializable Members
+    //    #region ISerializable Members
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            GCHandle handle = GCHandle.Alloc(Data);
-            IntPtr address = GCHandle.ToIntPtr(handle);
-            info.AddValue("dataAddress", address);
-        }
+    //    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    //    {
+    //        GCHandle handle = GCHandle.Alloc(Data);
+    //        IntPtr address = GCHandle.ToIntPtr(handle);
+    //        info.AddValue("dataAddress", address);
+    //    }
 
-        #endregion
-    }
+    //    #endregion
+    //}
     
     [Serializable]
     public class MyDataObject : IDataObject
@@ -80,29 +80,13 @@ namespace WpfApplication1
 
         private void SetData(object data, string format)
         {
-            object obj = new DataContainer(data);
-
-            if (string.IsNullOrEmpty(format))
-            {
-                // Create a dummy DataObject object to retrieve all possible formats.
-                // Ex.: For a System.String type, GetFormats returns 3 formats:
-                // "System.String", "UnicodeText" and "Text"
-                System.Windows.Forms.DataObject dataObject = new System.Windows.Forms.DataObject(data);
-                string[] formats = dataObject.GetFormats();
-                foreach (string fmt in formats)
-                {
-                    _Data[fmt] = obj;
-                }
-            }
-            else
-            {
-                _Data[format] = obj;
-            }
+            _Data[format] = data;
         }
 
         public void SetData(object data)
         {
-            SetData(data, null);
+            Type type = data.GetType();
+            SetData(data, type.FullName);
         }
 
         #endregion

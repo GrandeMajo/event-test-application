@@ -46,6 +46,7 @@ namespace WpfApplication1
         private Key key = Key.Q;
         private KeyGesture keyGesture;
         public static string currentDirectory = Directory.GetCurrentDirectory();
+        private MemoryStream ms;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -372,11 +373,36 @@ namespace WpfApplication1
         {
             //label1.Content = (turn) ? "Testo di prova..." : "Ciao Mamma!!";
             //turn = !turn;
-            FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Open);
-            BinaryFormatter serializer = new BinaryFormatter();
-            MyDataObject mdo = (MyDataObject)serializer.Deserialize(fs);
-            Clipboard.SetDataObject(mdo);
-            fs.Close();
+            //Clipboard.Clear();
+            //FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Open);
+            //BinaryFormatter serializer = new BinaryFormatter();
+            //MyDataObject mdo = (MyDataObject)serializer.Deserialize(fs);
+            //Clipboard.SetDataObject(mdo);
+            //fs.Close();
+            //LogLine("Deserializzazione da file eseguita.\n");
+
+            string[] formats = Clipboard.GetDataObject().GetFormats();
+            foreach (string format in formats)
+                LogLine(format);
+
+            LogLine("--------");
+            LogLine(DataFormats.Rtf);
+            LogLine(DataFormats.OemText);
+            LogLine(typeof(string).FullName);
+
+            if (Clipboard.ContainsData(DataFormats.Rtf))
+                LogLine("Rtf found 1");
+            if (Clipboard.ContainsData("Rich Text Format"))
+                LogLine("Rtf found 2");
+            if (Clipboard.ContainsData("Rtf"))
+                LogLine("Rtf found 3");
+
+            if (Clipboard.GetData(DataFormats.Rtf) != null)
+                LogLine("Rtf found 4");
+            if (Clipboard.GetData("Rich Text Format") != null)
+                LogLine("Rtf found 5");
+            if (Clipboard.GetData("Rtf") != null)
+                LogLine("Rtf found 6");
         }
 
         private void buttonOk_Click(object sender, RoutedEventArgs e)
@@ -413,9 +439,9 @@ namespace WpfApplication1
             //    if (files != null) {
             //        foreach (string file in files) {
             //            if (Directory.Exists(file))
-            //                LogTextBox.AppendText("Directory\t" + file + "\n");
+            //                LogLine("Directory\t" + file + "\n");
             //            else
-            //                LogTextBox.AppendText("File\t\t" + file + "\n");
+            //                LogLine("File\t\t" + file + "\n");
             //        }
             //    }
             //    else MessageBox.Show("niente testo!(1)");
@@ -427,7 +453,7 @@ namespace WpfApplication1
             //    string[] files = data.GetData("FileNameW") as string[];
             //    if (files != null) {
             //        foreach (string file in files)
-            //            LogTextBox.AppendText(file + "\n");
+            //            LogLine(file + "\n");
             //    }
             //}
             //else MessageBox.Show("FileNameW non presente...");
@@ -441,23 +467,33 @@ namespace WpfApplication1
             //    fs.Close();
             //}
 
-
-            //IDataObject ido = Clipboard.GetDataObject();
-            MyDataObject mdo = new MyDataObject(Clipboard.GetDataObject());
-            string[] formats = mdo.GetFormats();
-            if (formats == null)
+            string[] formats = Clipboard.GetDataObject().GetFormats();
+            if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
 
-            //foreach (string format in formats)
-            //{
-            //    string formatName = GetFormatFromDataFormat(format);
-            //    if (!Clipboard.ContainsData(formatName)) 
-            //        MessageBox.Show("cazzo " + formatName);
-            //}
+            object[] obj = new object[formats.Length];
+            for (int i = 0; i < formats.Length; i++)
+            {
+                if (formats[i] == typeof(string).FullName)  // valutare if (formats[i] != typeof(string).FullName) obj[i] = Clipboard.GetData(formats[i]);
+                    obj[i] = Clipboard.GetText(TextDataFormat.Text);
+                else
+                    obj[i] = Clipboard.GetData(formats[i]);
+                
+                if (obj[i] == null)
+                    LogLine("Null per " + formats[i]);
+                else
+                    LogLine(formats[i]);
+            }
 
+            //IDataObject ido = Clipboard.GetDataObject();
+            //string[] formats = ido.GetFormats();
+            //MyDataObject mdo = (MyDataObject)Clipboard.GetDataObject();
             FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
             BinaryFormatter serializer = new BinaryFormatter();
-            //MessageBox.Show(formats.Length.ToString());
+            serializer.Serialize(fs, obj);
+            fs.Close();
+            LogLine("Serializzazione su file eseguita.");
+
             //foreach (string format in formats)
             //{
             //    object data = Clipboard.GetData(format);
@@ -467,8 +503,6 @@ namespace WpfApplication1
             //        MessageBox.Show(format, format);
             //}
 
-            serializer.Serialize(fs, mdo);
-            fs.Close();
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
@@ -477,7 +511,7 @@ namespace WpfApplication1
             string[] formats = data.GetFormats();
 
             foreach (string format in formats)
-                LogTextBox.AppendText(format + "\n");
+                LogLine(format);
 
             //  Per aggiungere un file alla Clipboard
             //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
@@ -509,13 +543,13 @@ namespace WpfApplication1
         //        e.Handled = true;
 
         //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-        //    LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //    LogLine("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         //}
 
         //private void Window_KeyUp(object sender, KeyEventArgs e)
         //{
         //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-        //    LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //    LogLine("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         //}
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
@@ -546,9 +580,9 @@ namespace WpfApplication1
                 e.Handled = true;
 
             if (IsExtendedKey(e))
-                LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + ", is extended key\n");
+                LogLine("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + ", is extended key");
             else
-                LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
+                LogLine("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey));
 
         }
 
@@ -557,58 +591,19 @@ namespace WpfApplication1
             Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
 
             if (IsExtendedKey(e))
-                LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key\n");
+                LogLine("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key");
             else
-                LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+                LogLine("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key));
         }
 
-        private string GetFormatFromDataFormat(string dataFormat)
+        private void Log(string text)
         {
-            switch (dataFormat)
-            {
-                case "Text": return "Text";
-                case "UnicodeText": return "UnicodeText";
-                case "DeviceIndependentBitmap": return "Dib";
-                case "Bitmap": return "Bitmap";
-                case "EnhancedMetafile": return "EnhancedMetafile";
-                case "MetaFilePict": return "MetafilePicture";
-                case "SymbolicLink": return "SymbolicLink";
-                case "DataInterchangeFormat": return "Dif";
-                case "TaggedImageFileFormat": return "Tiff";
-                case "OEMText": return "OemText";
-                case "Palette": return "Palette";
-                case "PenData": return "PenData";
-                case "RiffAudio": return "Riff";
-                case "WaveAudio": return "WaveAudio";
-                case "FileDrop": return "FileDrop";
-                case "Locale": return "Locale";
-                case "HTML Format": return "Html";
-                case "Rich Text Format": return "Rtf";
-                case "CSV": return "CommaSeparatedValue";
-                case "PersistentObject": return "Serializable";
-                case "Xaml": return "Xaml";
-                case "XamlPackage": return "XamlPackage";
-            }
-
-            if (dataFormat == typeof(string).FullName)
-                return "StringFormat";
-
-            return dataFormat;
+            LogTextBox.AppendText(text);
         }
-
-        //static public bool HasProperty(this Type type, string name)
-        //{
-        //    return type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Any(p => p.Name == name);
-        //}
-
-        //public bool HasProperty(this object obj, string propertyName)
-        //{
-        //    return obj.GetType().GetProperty(propertyName) != null;
-        //}
-
-        //public bool HasMethod(this object obj, string methodName)
-        //{
-        //    return obj.GetType().GetProperty(methodName) != null;
-        //} 
+        
+        private void LogLine(string text)
+        {
+            LogTextBox.AppendText(text + "\n");
+        }
     }
 }
