@@ -46,7 +46,9 @@ namespace WpfApplication1
         private Key key = Key.Q;
         private KeyGesture keyGesture;
         public static string currentDirectory = Directory.GetCurrentDirectory();
-        private MemoryStream ms;
+        private MemoryStream memoryStream;
+        private BinaryFormatter serializer;
+        private Dictionary<string, object> clipboardContents;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -367,6 +369,9 @@ namespace WpfApplication1
         {
             InitializeComponent();
             keyGesture = new KeyGesture(key, modifierKey);
+            memoryStream = new MemoryStream();
+            serializer = new BinaryFormatter();
+            clipboardContents = new Dictionary<string, object>();
         }
 
         private void ButtonProva_Click(object sender, RoutedEventArgs e)
@@ -380,29 +385,19 @@ namespace WpfApplication1
             //Clipboard.SetDataObject(mdo);
             //fs.Close();
             //LogLine("Deserializzazione da file eseguita.\n");
+            if (memoryStream == null)
+                return;
 
-            string[] formats = Clipboard.GetDataObject().GetFormats();
-            foreach (string format in formats)
-                LogLine(format);
+            clipboardContents = (Dictionary<string, object>)serializer.Deserialize(memoryStream);
 
-            LogLine("--------");
-            LogLine(DataFormats.Rtf);
-            LogLine(DataFormats.OemText);
-            LogLine(typeof(string).FullName);
+            DataObject dataObject = new DataObject();
+            
+            foreach (KeyValuePair<string, object> content in clipboardContents) {
+                dataObject.SetData(content.Key, content.Value);
+            }
 
-            if (Clipboard.ContainsData(DataFormats.Rtf))
-                LogLine("Rtf found 1");
-            if (Clipboard.ContainsData("Rich Text Format"))
-                LogLine("Rtf found 2");
-            if (Clipboard.ContainsData("Rtf"))
-                LogLine("Rtf found 3");
-
-            if (Clipboard.GetData(DataFormats.Rtf) != null)
-                LogLine("Rtf found 4");
-            if (Clipboard.GetData("Rich Text Format") != null)
-                LogLine("Rtf found 5");
-            if (Clipboard.GetData("Rtf") != null)
-                LogLine("Rtf found 6");
+            Clipboard.SetDataObject(dataObject);
+            LogLine("Lettura da strea completata.");
         }
 
         private void buttonOk_Click(object sender, RoutedEventArgs e)
@@ -467,42 +462,44 @@ namespace WpfApplication1
             //    fs.Close();
             //}
 
-            string[] formats = Clipboard.GetDataObject().GetFormats();
+            string[] formats = Clipboard.GetDataObject().GetFormats(AutoConvertCheckBox.IsChecked.Value); // usa sempre false come parametro
+            
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
 
-            object[] obj = new object[formats.Length];
-            for (int i = 0; i < formats.Length; i++)
-            {
-                if (formats[i] == typeof(string).FullName)  // valutare if (formats[i] != typeof(string).FullName) obj[i] = Clipboard.GetData(formats[i]);
-                    obj[i] = Clipboard.GetText(TextDataFormat.Text);
-                else
-                    obj[i] = Clipboard.GetData(formats[i]);
-                
-                if (obj[i] == null)
-                    LogLine("Null per " + formats[i]);
-                else
-                    LogLine(formats[i]);
-            }
-
-            //IDataObject ido = Clipboard.GetDataObject();
-            //string[] formats = ido.GetFormats();
-            //MyDataObject mdo = (MyDataObject)Clipboard.GetDataObject();
-            FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            BinaryFormatter serializer = new BinaryFormatter();
-            serializer.Serialize(fs, obj);
-            fs.Close();
-            LogLine("Serializzazione su file eseguita.");
-
-            //foreach (string format in formats)
+            //object[] obj = new object[formats.Length];
+            //LogLine(formats.Length.ToString());
+            //for (int i = 0; i < formats.Length; i++)
             //{
-            //    object data = Clipboard.GetData(format);
-            //    if (data != null)
-            //        serializer.Serialize(fs, data);
+            //    if (formats[i] == typeof(string).FullName)  // valutare if (formats[i] != typeof(string).FullName) obj[i] = Clipboard.GetData(formats[i]);
+            //        obj[i] = Clipboard.GetText(TextDataFormat.Text);
             //    else
-            //        MessageBox.Show(format, format);
+            //        obj[i] = Clipboard.GetData(formats[i]);
+                
+            //    if (obj[i] == null)
+            //        LogLine("Null per " + formats[i]);
+            //    else
+            //        LogLine(formats[i]);
             //}
 
+            foreach (string format in formats) {
+                //SetObject(clipboardContents, format, Clipboard.GetData(format));
+                object obj = Clipboard.GetData(format);
+                if (obj != null)
+                    clipboardContents.Add(format, obj);
+            }
+
+            //if (!clipboardContents.ContainsKey(DataFormats.Text))
+            //    return;
+
+            //FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            serializer.Serialize(memoryStream, clipboardContents);
+            //fs.Close();
+            LogLine("Serializzazione su stream eseguita.");
+        }
+
+        private void SetObject(Dictionary<string, object> dic, string key, object value) {
+            dic.Add(key, value);
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
