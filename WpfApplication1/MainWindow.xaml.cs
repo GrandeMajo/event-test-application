@@ -46,6 +46,7 @@ namespace WpfApplication1
         private Key key = Key.Q;
         private KeyGesture keyGesture;
         public static string currentDirectory = Directory.GetCurrentDirectory();
+        private byte[] serializedObject;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -100,17 +101,17 @@ namespace WpfApplication1
         [Flags]
         public enum MouseEventFlags : uint
         {
-            LEFTDOWN    = 0x00000002,
-            LEFTUP      = 0x00000004,
-            MIDDLEDOWN  = 0x00000020,
-            MIDDLEUP    = 0x00000040,
-            MOVE        = 0x00000001,
-            ABSOLUTE    = 0x00008000,
-            RIGHTDOWN   = 0x00000008,
-            RIGHTUP     = 0x00000010,
-            WHEEL       = 0x00000800,
-            XDOWN       = 0x00000080,
-            XUP         = 0x00000100
+            LEFTDOWN = 0x00000002,
+            LEFTUP = 0x00000004,
+            MIDDLEDOWN = 0x00000020,
+            MIDDLEUP = 0x00000040,
+            MOVE = 0x00000001,
+            ABSOLUTE = 0x00008000,
+            RIGHTDOWN = 0x00000008,
+            RIGHTUP = 0x00000010,
+            WHEEL = 0x00000800,
+            XDOWN = 0x00000080,
+            XUP = 0x00000100
         }
 
         enum VirtualKey : int
@@ -361,7 +362,7 @@ namespace WpfApplication1
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetMessageExtraInfo();
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -370,9 +371,29 @@ namespace WpfApplication1
 
         private void ButtonProva_Click(object sender, RoutedEventArgs e)
         {
-            label1.Content = (turn) ? "Testo di prova..." : "Ciao Mamma!!";
-            turn = !turn;
-            // buttonOk.Content = "Chiudi";
+            //label1.Content = (turn) ? "Testo di prova..." : "Ciao Mamma!!";
+            //turn = !turn;
+            //Clipboard.Clear();
+            //FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Open);
+            //BinaryFormatter serializer = new BinaryFormatter();
+            //MyDataObject mdo = (MyDataObject)serializer.Deserialize(fs);
+            //Clipboard.SetDataObject(mdo);
+            //fs.Close();
+
+            if (serializedObject == null)
+                return;
+
+            Clipboard.Clear();
+            Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
+            DataObject dataObject = new DataObject();
+            
+            foreach (KeyValuePair<string, object> content in clipboardContents) {
+                dataObject.SetData(content.Key, content.Value);
+            }
+
+            Clipboard.SetDataObject(dataObject);
+            serializedObject = null;
+            LogLine("Lettura da stream completata.");
         }
 
         private void buttonOk_Click(object sender, RoutedEventArgs e)
@@ -400,8 +421,8 @@ namespace WpfApplication1
             i[0].iu.mi.dwFlags = (int)MouseEventFlags.LEFTUP;
             SendInput(1, i, INPUTSIZE);
             */
-            
-            if(string.IsNullOrEmpty(TestTextBox1.Text))
+
+            if (string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
             //if (Clipboard.ContainsFileDropList()) {
@@ -409,9 +430,9 @@ namespace WpfApplication1
             //    if (files != null) {
             //        foreach (string file in files) {
             //            if (Directory.Exists(file))
-            //                LogTextBox.AppendText("Directory\t" + file + "\n");
+            //                LogLine("Directory\t" + file + "\n");
             //            else
-            //                LogTextBox.AppendText("File\t\t" + file + "\n");
+            //                LogLine("File\t\t" + file + "\n");
             //        }
             //    }
             //    else MessageBox.Show("niente testo!(1)");
@@ -423,7 +444,7 @@ namespace WpfApplication1
             //    string[] files = data.GetData("FileNameW") as string[];
             //    if (files != null) {
             //        foreach (string file in files)
-            //            LogTextBox.AppendText(file + "\n");
+            //            LogLine(file + "\n");
             //    }
             //}
             //else MessageBox.Show("FileNameW non presente...");
@@ -437,12 +458,25 @@ namespace WpfApplication1
             //    fs.Close();
             //}
 
-            DataObject data = (DataObject)Clipboard.GetDataObject();
-            FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            BinaryFormatter serializer = new BinaryFormatter();
-            serializer.Serialize(fs, data);
-            fs.Close();
+            string[] formats = Clipboard.GetDataObject().GetFormats(AutoConvertCheckBox.IsChecked.Value); // usa sempre false come parametro
+            
+            if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
+                return;
 
+            Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
+            foreach (string format in formats) {
+                object obj = Clipboard.GetData(format);
+                if (obj != null)
+                    clipboardContents.Add(format, obj);
+            }
+
+            serializedObject = Serializer.ObjectSerialize(clipboardContents);
+
+            LogLine("Serializzazione su stream eseguita.");
+        }
+
+        private void SetObject(Dictionary<string, object> dic, string key, object value) {
+            dic.Add(key, value);
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
@@ -451,8 +485,8 @@ namespace WpfApplication1
             string[] formats = data.GetFormats();
 
             foreach (string format in formats)
-                LogTextBox.AppendText(format + "\n");
-            
+                LogLine(format);
+
             //  Per aggiungere un file alla Clipboard
             //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
 
@@ -469,11 +503,11 @@ namespace WpfApplication1
         {
             Win32Point p = new Win32Point();
             GetCursorPos(ref p);
-            // p = CorrectGetPosition(this); prende le coordinate a partire dall'angolo in alto a sinistra del Grid
+            // p = CorrectGetPosition(this); prende le coordinate a partire dall'angolo in alto a sinistra del Grid 
             Ascissa.Text = p.X.ToString();
             Ordinata.Text = p.Y.ToString();
-            //Ascissa.Text = ((int)(p.X * widthRatio)).ToString();
-            //Ordinata.Text = ((int)(p.Y * heightRatio)).ToString();
+            //Ascissa.Text = ((int)(p.X * widthRatio)).ToString(); 
+            //Ordinata.Text = ((int)(p.Y * heightRatio)).ToString(); 
         }
 
 
@@ -483,13 +517,13 @@ namespace WpfApplication1
         //        e.Handled = true;
 
         //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-        //    LogTextBox.AppendText("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //    LogLine("Character pressed: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         //}
 
         //private void Window_KeyUp(object sender, KeyEventArgs e)
         //{
         //    Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
-        //    LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+        //    LogLine("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
         //}
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
@@ -499,7 +533,7 @@ namespace WpfApplication1
 
         //protected override void OnPreviewKeyDown(KeyEventArgs e)
         //{
-            
+
         //    if ((Keyboard.Modifiers & ModifierKeys.Windows) == ModifierKeys.Windows)
         //    {
         //        if(e.Key == Key.Tab)
@@ -509,20 +543,20 @@ namespace WpfApplication1
         //}
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {            
+        {
             Key pressedKey = (e.Key == Key.System ? e.SystemKey : e.Key);
-            
+
             //if (pressedKey == key && ((Keyboard.Modifiers & modifierKey) == modifierKey))
             if (keyGesture.Matches(this, e))
                 this.Close();
 
             if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
                 e.Handled = true;
-            
+
             if (IsExtendedKey(e))
-                LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + ", is extended key\n");
+                LogLine("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + ", is extended key");
             else
-                LogTextBox.AppendText("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey) + "\n");
+                LogLine("Character pressed: " + pressedKey.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(pressedKey));
 
         }
 
@@ -531,11 +565,19 @@ namespace WpfApplication1
             Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
 
             if (IsExtendedKey(e))
-                LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key\n");
+                LogLine("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + ", is extended key");
             else
-                LogTextBox.AppendText("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key) + "\n");
+                LogLine("Character released: " + key.ToString() + ", code: " + KeyInterop.VirtualKeyFromKey(key));
         }
 
-
+        private void Log(string text)
+        {
+            LogTextBox.AppendText(text);
+        }
+        
+        private void LogLine(string text)
+        {
+            LogTextBox.AppendText(text + "\n");
+        }
     }
 }
