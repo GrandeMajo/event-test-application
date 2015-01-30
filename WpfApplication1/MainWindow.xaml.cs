@@ -46,9 +46,7 @@ namespace WpfApplication1
         private Key key = Key.Q;
         private KeyGesture keyGesture;
         public static string currentDirectory = Directory.GetCurrentDirectory();
-        private MemoryStream memoryStream;
-        private BinaryFormatter serializer;
-        private Dictionary<string, object> clipboardContents;
+        private byte[] serializedObject;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -369,9 +367,6 @@ namespace WpfApplication1
         {
             InitializeComponent();
             keyGesture = new KeyGesture(key, modifierKey);
-            memoryStream = new MemoryStream();
-            serializer = new BinaryFormatter();
-            clipboardContents = new Dictionary<string, object>();
         }
 
         private void ButtonProva_Click(object sender, RoutedEventArgs e)
@@ -384,12 +379,12 @@ namespace WpfApplication1
             //MyDataObject mdo = (MyDataObject)serializer.Deserialize(fs);
             //Clipboard.SetDataObject(mdo);
             //fs.Close();
-            //LogLine("Deserializzazione da file eseguita.\n");
-            if (memoryStream == null)
+
+            if (serializedObject == null)
                 return;
 
-            clipboardContents = (Dictionary<string, object>)serializer.Deserialize(memoryStream);
-
+            Clipboard.Clear();
+            Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
             DataObject dataObject = new DataObject();
             
             foreach (KeyValuePair<string, object> content in clipboardContents) {
@@ -397,7 +392,8 @@ namespace WpfApplication1
             }
 
             Clipboard.SetDataObject(dataObject);
-            LogLine("Lettura da strea completata.");
+            serializedObject = null;
+            LogLine("Lettura da stream completata.");
         }
 
         private void buttonOk_Click(object sender, RoutedEventArgs e)
@@ -467,34 +463,15 @@ namespace WpfApplication1
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
 
-            //object[] obj = new object[formats.Length];
-            //LogLine(formats.Length.ToString());
-            //for (int i = 0; i < formats.Length; i++)
-            //{
-            //    if (formats[i] == typeof(string).FullName)  // valutare if (formats[i] != typeof(string).FullName) obj[i] = Clipboard.GetData(formats[i]);
-            //        obj[i] = Clipboard.GetText(TextDataFormat.Text);
-            //    else
-            //        obj[i] = Clipboard.GetData(formats[i]);
-                
-            //    if (obj[i] == null)
-            //        LogLine("Null per " + formats[i]);
-            //    else
-            //        LogLine(formats[i]);
-            //}
-
+            Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
             foreach (string format in formats) {
-                //SetObject(clipboardContents, format, Clipboard.GetData(format));
                 object obj = Clipboard.GetData(format);
                 if (obj != null)
                     clipboardContents.Add(format, obj);
             }
 
-            //if (!clipboardContents.ContainsKey(DataFormats.Text))
-            //    return;
+            serializedObject = Serializer.ObjectSerialize(clipboardContents);
 
-            //FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            serializer.Serialize(memoryStream, clipboardContents);
-            //fs.Close();
             LogLine("Serializzazione su stream eseguita.");
         }
 
