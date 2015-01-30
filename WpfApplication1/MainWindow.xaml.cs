@@ -380,8 +380,10 @@ namespace WpfApplication1
             //Clipboard.SetDataObject(mdo);
             //fs.Close();
 
-            if (serializedObject == null)
+            if (serializedObject == null) {
+                LogLine("Oggetto serializzato == null...");
                 return;
+            }
 
             Clipboard.Clear();
             Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
@@ -391,7 +393,7 @@ namespace WpfApplication1
                 dataObject.SetData(content.Key, content.Value);
             }
 
-            Clipboard.SetDataObject(dataObject);
+            Clipboard.SetDataObject(dataObject, true);
             serializedObject = null;
             LogLine("Lettura da stream completata.");
         }
@@ -465,9 +467,17 @@ namespace WpfApplication1
 
             Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
             foreach (string format in formats) {
+                LogLine("- format: " + format);
                 object obj = Clipboard.GetData(format);
-                if (obj != null)
+                if (obj != null && obj.GetType().IsSerializable)
                     clipboardContents.Add(format, obj);
+                else
+                    LogLine("\tnull o non serializzabile...");
+            }
+
+            if (clipboardContents.Count == 0) {
+                LogLine("Nessun contenuto serializzabile...");
+                return;
             }
 
             serializedObject = Serializer.ObjectSerialize(clipboardContents);
