@@ -469,7 +469,7 @@ namespace WpfApplication1
             foreach (string format in formats) {
                 LogLine("- format: " + format);
                 object obj = Clipboard.GetData(format);
-                if (obj != null && obj.GetType().IsSerializable)
+                if (obj != null && obj.GetType().IsSerializable && format != "EnhancedMetafile")
                     clipboardContents.Add(format, obj);
                 else
                     LogLine("\tnull o non serializzabile...");
@@ -483,10 +483,6 @@ namespace WpfApplication1
             serializedObject = Serializer.ObjectSerialize(clipboardContents);
 
             LogLine("Serializzazione su stream eseguita.");
-        }
-
-        private void SetObject(Dictionary<string, object> dic, string key, object value) {
-            dic.Add(key, value);
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
