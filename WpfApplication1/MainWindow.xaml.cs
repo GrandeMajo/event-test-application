@@ -460,7 +460,7 @@ namespace WpfApplication1
             //    fs.Close();
             //}
 
-            string[] formats = Clipboard.GetDataObject().GetFormats(AutoConvertCheckBox.IsChecked.Value); // usa sempre false come parametro
+            string[] formats = Clipboard.GetDataObject().GetFormats(false);
             
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
@@ -488,7 +488,7 @@ namespace WpfApplication1
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
         {
             IDataObject data = Clipboard.GetDataObject();
-            string[] formats = data.GetFormats();
+            string[] formats = data.GetFormats(AutoConvertCheckBox.IsChecked.Value);
 
             foreach (string format in formats)
                 LogLine(format);
