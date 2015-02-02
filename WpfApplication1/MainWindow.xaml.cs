@@ -487,6 +487,8 @@ namespace WpfApplication1
                     else
                         LogLine("\tnull o non serializzabile...");
                 }
+                else
+                    LogLine("\tformato ignorato...");
             }
 
             if (clipboardContents.Count == 0) {
