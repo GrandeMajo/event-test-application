@@ -463,7 +463,8 @@ namespace WpfApplication1
 
             //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
 
-            string[] formats = Clipboard.GetDataObject().GetFormats(false);
+            IDataObject ido = Clipboard.GetDataObject();
+            string[] formats = ido.GetFormats(false);
             
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
@@ -472,7 +473,7 @@ namespace WpfApplication1
             foreach (string format in formats) {
                 LogLine("- format: " + format);
                 if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture) {  // formati che danno diversi problemi
-                    object obj = Clipboard.GetData(format);
+                    object obj = ido.GetData(format);
                     if (obj != null && obj.GetType().IsSerializable)
                         clipboardContents.Add(format, obj);
                     else
