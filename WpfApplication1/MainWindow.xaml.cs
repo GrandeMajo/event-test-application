@@ -469,10 +469,18 @@ namespace WpfApplication1
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
 
+            //if (formats.Contains<string>("FileContents")) {
+            //    MemoryStream[] contents = (MemoryStream[])ido.GetData("FileContents");
+            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            //    foreach (MemoryStream content in contents)
+            //        content.CopyTo(fs);
+            //    fs.Close();
+            //}
+
             Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
             foreach (string format in formats) {
                 LogLine("- format: " + format);
-                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture) {  // formati che danno diversi problemi
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents") {  // formati che danno diversi problemi
                     object obj = ido.GetData(format);
                     if (obj != null && obj.GetType().IsSerializable)
                         clipboardContents.Add(format, obj);
