@@ -393,7 +393,7 @@ namespace WpfApplication1
                 dataObject.SetData(content.Key, content.Value);
             }
 
-            Clipboard.SetDataObject(dataObject, true);
+            Clipboard.SetDataObject(dataObject);
             serializedObject = null;
             LogLine("Lettura da stream completata.");
         }
@@ -460,6 +460,9 @@ namespace WpfApplication1
             //    fs.Close();
             //}
 
+
+            //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
+
             string[] formats = Clipboard.GetDataObject().GetFormats(false);
             
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
@@ -468,11 +471,13 @@ namespace WpfApplication1
             Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
             foreach (string format in formats) {
                 LogLine("- format: " + format);
-                object obj = Clipboard.GetData(format);
-                if (obj != null && obj.GetType().IsSerializable && format != "EnhancedMetafile")
-                    clipboardContents.Add(format, obj);
-                else
-                    LogLine("\tnull o non serializzabile...");
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture) {
+                    object obj = Clipboard.GetData(format);
+                    if (obj != null && obj.GetType().IsSerializable)
+                        clipboardContents.Add(format, obj);
+                    else
+                        LogLine("\tnull o non serializzabile...");
+                }
             }
 
             if (clipboardContents.Count == 0) {
@@ -579,11 +584,13 @@ namespace WpfApplication1
         private void Log(string text)
         {
             LogTextBox.AppendText(text);
+            LogTextBox.ScrollToEnd();
         }
         
         private void LogLine(string text)
         {
             LogTextBox.AppendText(text + "\n");
+            LogTextBox.ScrollToEnd();
         }
     }
 }
