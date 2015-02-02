@@ -471,7 +471,7 @@ namespace WpfApplication1
             Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
             foreach (string format in formats) {
                 LogLine("- format: " + format);
-                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture) {
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture) {  // formati che danno diversi problemi
                     object obj = Clipboard.GetData(format);
                     if (obj != null && obj.GetType().IsSerializable)
                         clipboardContents.Add(format, obj);
