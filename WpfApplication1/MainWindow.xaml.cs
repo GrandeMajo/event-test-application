@@ -393,7 +393,7 @@ namespace WpfApplication1
                 dataObject.SetData(content.Key, content.Value);
             }
 
-            Clipboard.SetDataObject(dataObject, true);
+            Clipboard.SetDataObject(dataObject);
             serializedObject = null;
             LogLine("Lettura da stream completata.");
         }
@@ -460,19 +460,35 @@ namespace WpfApplication1
             //    fs.Close();
             //}
 
-            string[] formats = Clipboard.GetDataObject().GetFormats(false);
+
+            //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
+
+            IDataObject ido = Clipboard.GetDataObject();
+            string[] formats = ido.GetFormats(false);
             
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
 
+            //if (formats.Contains<string>("FileContents")) {
+            //    MemoryStream[] contents = (MemoryStream[])ido.GetData("FileContents");
+            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
+            //    foreach (MemoryStream content in contents)
+            //        content.CopyTo(fs);
+            //    fs.Close();
+            //}
+
             Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
             foreach (string format in formats) {
                 LogLine("- format: " + format);
-                object obj = Clipboard.GetData(format);
-                if (obj != null && obj.GetType().IsSerializable && format != "EnhancedMetafile")
-                    clipboardContents.Add(format, obj);
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents") {  // formati che danno diversi problemi
+                    object obj = ido.GetData(format);
+                    if (obj != null && obj.GetType().IsSerializable)
+                        clipboardContents.Add(format, obj);
+                    else
+                        LogLine("\tnull o non serializzabile...");
+                }
                 else
-                    LogLine("\tnull o non serializzabile...");
+                    LogLine("\tformato ignorato...");
             }
 
             if (clipboardContents.Count == 0) {
@@ -579,11 +595,13 @@ namespace WpfApplication1
         private void Log(string text)
         {
             LogTextBox.AppendText(text);
+            LogTextBox.ScrollToEnd();
         }
         
         private void LogLine(string text)
         {
             LogTextBox.AppendText(text + "\n");
+            LogTextBox.ScrollToEnd();
         }
     }
 }
