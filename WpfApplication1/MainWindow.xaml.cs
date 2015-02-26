@@ -390,10 +390,10 @@ namespace WpfApplication1
             DataObject dataObject = new DataObject();
             
             foreach (KeyValuePair<string, object> content in clipboardContents) {
-                dataObject.SetData(content.Key, content.Value);
+                dataObject.SetData(content.Key, content.Value, false);
             }
 
-            Clipboard.SetDataObject(dataObject);
+            Clipboard.SetDataObject(dataObject/*, true*/);
             serializedObject = null;
             LogLine("Lettura da stream completata.");
         }
