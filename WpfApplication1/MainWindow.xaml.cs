@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -22,6 +23,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using WpfApplication1.Border;
+using Ionic.Zip;
 
 namespace WpfApplication1
 {
@@ -380,7 +382,8 @@ namespace WpfApplication1
             //Clipboard.SetDataObject(mdo);
             //fs.Close();
 
-            if (serializedObject == null) {
+            if (serializedObject == null)
+            {
                 LogLine("Oggetto serializzato == null...");
                 return;
             }
@@ -388,8 +391,9 @@ namespace WpfApplication1
             Clipboard.Clear();
             Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
             DataObject dataObject = new DataObject();
-            
-            foreach (KeyValuePair<string, object> content in clipboardContents) {
+
+            foreach (KeyValuePair<string, object> content in clipboardContents)
+            {
                 dataObject.SetData(content.Key, content.Value, false);
             }
 
@@ -427,6 +431,29 @@ namespace WpfApplication1
             if (string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
+            // Per zippare i file copiati nella clipboard
+            //if (Clipboard.ContainsFileDropList())
+            //{
+            //    StringCollection files = Clipboard.GetFileDropList();
+            //    if (files != null)
+            //    {
+            //        string path = "C:\\Users\\Gianluca\\Desktop";
+            //        string tempPath = System.IO.Path.Combine(path, "tmp");
+            //        string zipPath = System.IO.Path.ChangeExtension(tempPath, "zip");
+            //        Directory.CreateDirectory(tempPath);
+            //        foreach (string file in files)
+            //        {
+            //            if (Directory.Exists(file))
+            //                DirectoryCopy(file, System.IO.Path.Combine(tempPath, (new DirectoryInfo(file)).Name), true);
+            //            else /*if (File.Exists(file))*/
+            //                File.Copy(file, System.IO.Path.Combine(tempPath, System.IO.Path.GetFileName(file)));
+            //        }
+            //        System.IO.Compression.ZipFile.CreateFromDirectory(tempPath, zipPath, CompressionLevel.NoCompression, false);
+            //        //long totalBytes = (new FileInfo(zipPath)).Length;
+            //        Directory.Delete(tempPath, true);
+            //    }
+            //}
+
             //if (Clipboard.ContainsFileDropList()) {
             //    StringCollection files = Clipboard.GetFileDropList();
             //    if (files != null) {
@@ -444,7 +471,7 @@ namespace WpfApplication1
 
             //IDataObject ido = Clipboard.GetDataObject();
             //string[] formats = ido.GetFormats(false);
-            
+
             //if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
             //    return;
 
@@ -471,8 +498,61 @@ namespace WpfApplication1
 
             //LogLine("Serializzazione su stream eseguita.");
 
-
+            System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
+            string path = "C:\\Users\\Gianluca\\Desktop";    
+            string tempPath = System.IO.Path.Combine(path, "temp.zip");
+            using (Ionic.Zip.ZipFile zip = new Ionic.Zip.ZipFile(tempPath))
+            {
+                foreach (string file in files)
+                {
+                    // provare con zip.AddItem(file); e con addFiles
+                    FileAttributes attr = File.GetAttributes(file);
+                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                        zip.AddDirectory(file);
+                    else
+                        zip.AddFile(file);
+                }
+            }
         }
+
+        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            // If the destination directory doesn't exist, create it. 
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = System.IO.Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location. 
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string temppath = System.IO.Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+                }
+            }
+        }
+
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
         {
@@ -559,7 +639,7 @@ namespace WpfApplication1
             LogTextBox.AppendText(text);
             LogTextBox.ScrollToEnd();
         }
-        
+
         private void LogLine(string text)
         {
             LogTextBox.AppendText(text + "\n");
