@@ -440,65 +440,38 @@ namespace WpfApplication1
             //    else MessageBox.Show("niente testo!(1)");
             //}
 
-            //IDataObject data = Clipboard.GetDataObject();
-            //if (data.GetDataPresent("FileNameW"))
-            //{
-            //    string[] files = data.GetData("FileNameW") as string[];
-            //    if (files != null) {
-            //        foreach (string file in files)
-            //            LogLine(file + "\n");
-            //    }
-            //}
-            //else MessageBox.Show("FileNameW non presente...");
-
-            //if (Clipboard.ContainsText(TextDataFormat.Text))
-            //{
-            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            //    BinaryFormatter serializer = new BinaryFormatter();
-            //    string text = Clipboard.GetText(TextDataFormat.Text);
-            //    serializer.Serialize(fs, text);
-            //    fs.Close();
-            //}
-
-
             //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
 
-            IDataObject ido = Clipboard.GetDataObject();
-            string[] formats = ido.GetFormats(false);
+            //IDataObject ido = Clipboard.GetDataObject();
+            //string[] formats = ido.GetFormats(false);
             
-            if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
-                return;
+            //if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
+            //    return;
 
-            //if (formats.Contains<string>("FileContents")) {
-            //    MemoryStream[] contents = (MemoryStream[])ido.GetData("FileContents");
-            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            //    foreach (MemoryStream content in contents)
-            //        content.CopyTo(fs);
-            //    fs.Close();
+            //Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
+            //foreach (string format in formats) {
+            //    LogLine("- format: " + format);
+            //    if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents") {  // formati che danno diversi problemi
+            //        object obj = ido.GetData(format);
+            //        if (obj != null && obj.GetType().IsSerializable)
+            //            clipboardContents.Add(format, obj);
+            //        else
+            //            LogLine("\tnull o non serializzabile...");
+            //    }
+            //    else
+            //        LogLine("\tformato ignorato...");
             //}
 
-            Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
-            foreach (string format in formats) {
-                LogLine("- format: " + format);
-                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents") {  // formati che danno diversi problemi
-                    object obj = ido.GetData(format);
-                    if (obj != null && obj.GetType().IsSerializable)
-                        clipboardContents.Add(format, obj);
-                    else
-                        LogLine("\tnull o non serializzabile...");
-                }
-                else
-                    LogLine("\tformato ignorato...");
-            }
+            //if (clipboardContents.Count == 0) {
+            //    LogLine("Nessun contenuto serializzabile...");
+            //    return;
+            //}
 
-            if (clipboardContents.Count == 0) {
-                LogLine("Nessun contenuto serializzabile...");
-                return;
-            }
+            //serializedObject = Serializer.ObjectSerialize(clipboardContents);
 
-            serializedObject = Serializer.ObjectSerialize(clipboardContents);
+            //LogLine("Serializzazione su stream eseguita.");
 
-            LogLine("Serializzazione su stream eseguita.");
+
         }
 
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
@@ -508,17 +481,6 @@ namespace WpfApplication1
 
             foreach (string format in formats)
                 LogLine(format);
-
-            //  Per aggiungere un file alla Clipboard
-            //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
-
-            //if (File.Exists(file))
-            //{
-            //    Clipboard.Clear();
-            //    DataObject data = new DataObject();
-            //    data.SetData(DataFormats.FileDrop, new string[] { file });
-            //    Clipboard.SetDataObject(data);
-            //}
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
