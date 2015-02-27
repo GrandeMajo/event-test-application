@@ -432,76 +432,34 @@ namespace WpfApplication1
             if (string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
-            // Per zippare i file copiati nella clipboard
-            Stopwatch watch = Stopwatch.StartNew();
-            if (Clipboard.ContainsFileDropList())
-            {
-                StringCollection files = Clipboard.GetFileDropList();
-                if (files != null)
-                {
-                    string path = "C:\\Users\\Gianluca\\Desktop";
-                    string tempPath = System.IO.Path.Combine(path, "tmp");
-                    string zipPath = System.IO.Path.ChangeExtension(tempPath, "zip");
-                    Directory.CreateDirectory(tempPath);
-                    foreach (string file in files)
-                    {
-                        if ((File.GetAttributes(file) & FileAttributes.Directory) == FileAttributes.Directory)
-                            DirectoryCopy(file, System.IO.Path.Combine(tempPath, (new DirectoryInfo(file)).Name), true);
-                        else
-                            File.Copy(file, System.IO.Path.Combine(tempPath, System.IO.Path.GetFileName(file)));
-                    }
-                    System.IO.Compression.ZipFile.CreateFromDirectory(tempPath, zipPath, CompressionLevel.NoCompression, false);
-                    //long totalBytes = (new FileInfo(zipPath)).Length;
-                    Directory.Delete(tempPath, true);
-                }
-            }
-            long elapsedMs = watch.ElapsedMilliseconds;
-            LogLine("Execution time: " + elapsedMs);
-
-            //if (Clipboard.ContainsFileDropList()) {
+            /* Per zippare i file copiati nella clipboard */
+            //Stopwatch watch = Stopwatch.StartNew();
+            //if (Clipboard.ContainsFileDropList())
+            //{
             //    StringCollection files = Clipboard.GetFileDropList();
-            //    if (files != null) {
-            //        foreach (string file in files) {
-            //            if (Directory.Exists(file))
-            //                LogLine("Directory\t" + file + "\n");
+            //    if (files != null)
+            //    {
+            //        string path = "C:\\Users\\Gianluca\\Desktop";
+            //        string tempPath = System.IO.Path.Combine(path, "tmp");
+            //        string zipPath = System.IO.Path.ChangeExtension(tempPath, "zip");
+            //        Directory.CreateDirectory(tempPath);
+            //        MessageBox.Show("pippo");
+            //        foreach (string file in files)
+            //        {
+            //            if ((File.GetAttributes(file) & FileAttributes.Directory) == FileAttributes.Directory)
+            //                DirectoryCopy(file, System.IO.Path.Combine(tempPath, (new DirectoryInfo(file)).Name), true);
             //            else
-            //                LogLine("File\t\t" + file + "\n");
+            //                File.Copy(file, System.IO.Path.Combine(tempPath, System.IO.Path.GetFileName(file)));
             //        }
+            //        System.IO.Compression.ZipFile.CreateFromDirectory(tempPath, zipPath, CompressionLevel.NoCompression, false);
+            //        //long totalBytes = (new FileInfo(zipPath)).Length;
+            //        Directory.Delete(tempPath, true);
             //    }
-            //    else MessageBox.Show("niente testo!(1)");
             //}
+            //long elapsedMs = watch.ElapsedMilliseconds;
+            //LogLine("Execution time: " + elapsedMs);
 
-            //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
-
-            //IDataObject ido = Clipboard.GetDataObject();
-            //string[] formats = ido.GetFormats(false);
-
-            //if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
-            //    return;
-
-            //Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
-            //foreach (string format in formats) {
-            //    LogLine("- format: " + format);
-            //    if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents") {  // formati che danno diversi problemi
-            //        object obj = ido.GetData(format);
-            //        if (obj != null && obj.GetType().IsSerializable)
-            //            clipboardContents.Add(format, obj);
-            //        else
-            //            LogLine("\tnull o non serializzabile...");
-            //    }
-            //    else
-            //        LogLine("\tformato ignorato...");
-            //}
-
-            //if (clipboardContents.Count == 0) {
-            //    LogLine("Nessun contenuto serializzabile...");
-            //    return;
-            //}
-
-            //serializedObject = Serializer.ObjectSerialize(clipboardContents);
-
-            //LogLine("Serializzazione su stream eseguita.");
-
+            /* Oppure un altro modo */
             //Stopwatch watch = Stopwatch.StartNew();
             //System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
             //string path = "C:\\Users\\Gianluca\\Desktop";
@@ -518,44 +476,53 @@ namespace WpfApplication1
             //watch.Stop();
             //long elapsedMs = watch.ElapsedMilliseconds;
             //LogLine("Execution time: " + elapsedMs);
-        }
 
-        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
-        {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-            DirectoryInfo[] dirs = dir.GetDirectories();
+            //if (Clipboard.ContainsFileDropList()) {
+            //    StringCollection files = Clipboard.GetFileDropList();
+            //    if (files != null) {
+            //        foreach (string file in files) {
+            //            if (Directory.Exists(file))
+            //                LogLine("Directory\t" + file + "\n");
+            //            else
+            //                LogLine("File\t\t" + file + "\n");
+            //        }
+            //    }
+            //    else MessageBox.Show("niente testo!(1)");
+            //}
 
-            if (!dir.Exists)
+            //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
+
+            IDataObject ido = Clipboard.GetDataObject();
+            string[] formats = ido.GetFormats(false);
+
+            if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
+                return;
+
+            Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
+            foreach (string format in formats)
             {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
-            }
-
-            // If the destination directory doesn't exist, create it. 
-            if (!Directory.Exists(destDirName))
-            {
-                Directory.CreateDirectory(destDirName);
-            }
-
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string tempPath = System.IO.Path.Combine(destDirName, file.Name);
-                file.CopyTo(tempPath, false);
-            }
-
-            // If copying subdirectories, copy them and their contents to new location. 
-            if (copySubDirs)
-            {
-                foreach (DirectoryInfo subdir in dirs)
-                {
-                    string temppath = System.IO.Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+                LogLine("- format: " + format);
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents")
+                {  // formati che danno diversi problemi
+                    object obj = ido.GetData(format);
+                    if (obj != null && obj.GetType().IsSerializable)
+                        clipboardContents.Add(format, obj);
+                    else
+                        LogLine("\tnull o non serializzabile...");
                 }
+                else
+                    LogLine("\tformato ignorato...");
             }
+
+            if (clipboardContents.Count == 0)
+            {
+                LogLine("Nessun contenuto serializzabile...");
+                return;
+            }
+
+            serializedObject = Serializer.ObjectSerialize(clipboardContents);
+
+            LogLine("Serializzazione su stream eseguita.");
         }
 
 
@@ -649,6 +616,45 @@ namespace WpfApplication1
         {
             LogTextBox.AppendText(text + "\n");
             LogTextBox.ScrollToEnd();
+        }
+
+
+        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            // If the destination directory doesn't exist, create it. 
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = System.IO.Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location. 
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = System.IO.Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+                }
+            }
         }
     }
 }
