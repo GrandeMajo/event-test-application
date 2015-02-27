@@ -24,6 +24,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using WpfApplication1.Border;
 using Ionic.Zip;
+using System.Diagnostics;
 
 namespace WpfApplication1
 {
@@ -432,27 +433,30 @@ namespace WpfApplication1
                 return;
 
             // Per zippare i file copiati nella clipboard
-            //if (Clipboard.ContainsFileDropList())
-            //{
-            //    StringCollection files = Clipboard.GetFileDropList();
-            //    if (files != null)
-            //    {
-            //        string path = "C:\\Users\\Gianluca\\Desktop";
-            //        string tempPath = System.IO.Path.Combine(path, "tmp");
-            //        string zipPath = System.IO.Path.ChangeExtension(tempPath, "zip");
-            //        Directory.CreateDirectory(tempPath);
-            //        foreach (string file in files)
-            //        {
-            //            if (Directory.Exists(file))
-            //                DirectoryCopy(file, System.IO.Path.Combine(tempPath, (new DirectoryInfo(file)).Name), true);
-            //            else /*if (File.Exists(file))*/
-            //                File.Copy(file, System.IO.Path.Combine(tempPath, System.IO.Path.GetFileName(file)));
-            //        }
-            //        System.IO.Compression.ZipFile.CreateFromDirectory(tempPath, zipPath, CompressionLevel.NoCompression, false);
-            //        //long totalBytes = (new FileInfo(zipPath)).Length;
-            //        Directory.Delete(tempPath, true);
-            //    }
-            //}
+            Stopwatch watch = Stopwatch.StartNew();
+            if (Clipboard.ContainsFileDropList())
+            {
+                StringCollection files = Clipboard.GetFileDropList();
+                if (files != null)
+                {
+                    string path = "C:\\Users\\Gianluca\\Desktop";
+                    string tempPath = System.IO.Path.Combine(path, "tmp");
+                    string zipPath = System.IO.Path.ChangeExtension(tempPath, "zip");
+                    Directory.CreateDirectory(tempPath);
+                    foreach (string file in files)
+                    {
+                        if ((File.GetAttributes(file) & FileAttributes.Directory) == FileAttributes.Directory)
+                            DirectoryCopy(file, System.IO.Path.Combine(tempPath, (new DirectoryInfo(file)).Name), true);
+                        else
+                            File.Copy(file, System.IO.Path.Combine(tempPath, System.IO.Path.GetFileName(file)));
+                    }
+                    System.IO.Compression.ZipFile.CreateFromDirectory(tempPath, zipPath, CompressionLevel.NoCompression, false);
+                    //long totalBytes = (new FileInfo(zipPath)).Length;
+                    Directory.Delete(tempPath, true);
+                }
+            }
+            long elapsedMs = watch.ElapsedMilliseconds;
+            LogLine("Execution time: " + elapsedMs);
 
             //if (Clipboard.ContainsFileDropList()) {
             //    StringCollection files = Clipboard.GetFileDropList();
@@ -498,21 +502,22 @@ namespace WpfApplication1
 
             //LogLine("Serializzazione su stream eseguita.");
 
-            System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
-            string path = "C:\\Users\\Gianluca\\Desktop";    
-            string tempPath = System.IO.Path.Combine(path, "temp.zip");
-            using (Ionic.Zip.ZipFile zip = new Ionic.Zip.ZipFile(tempPath))
-            {
-                foreach (string file in files)
-                {
-                    // provare con zip.AddItem(file); e con addFiles
-                    FileAttributes attr = File.GetAttributes(file);
-                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                        zip.AddDirectory(file);
-                    else
-                        zip.AddFile(file);
-                }
-            }
+            //Stopwatch watch = Stopwatch.StartNew();
+            //System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
+            //string path = "C:\\Users\\Gianluca\\Desktop";
+            //string tempPath = System.IO.Path.Combine(path, "temp.zip");
+            //using (Ionic.Zip.ZipFile zip = new Ionic.Zip.ZipFile(tempPath)) {
+            //    foreach (string file in files) {
+            //        if ((File.GetAttributes(file) & FileAttributes.Directory) == FileAttributes.Directory)
+            //            zip.AddDirectory(file, (new DirectoryInfo(file)).Name);
+            //        else
+            //            zip.AddFile(file, "");
+            //    }
+            //    zip.Save();
+            //}
+            //watch.Stop();
+            //long elapsedMs = watch.ElapsedMilliseconds;
+            //LogLine("Execution time: " + elapsedMs);
         }
 
         private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
