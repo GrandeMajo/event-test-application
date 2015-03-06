@@ -23,7 +23,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using WpfApplication1.Border;
-using Ionic.Zip;
+//using Ionic.Zip;
 using System.Diagnostics;
 
 namespace WpfApplication1
@@ -382,25 +382,31 @@ namespace WpfApplication1
             //MyDataObject mdo = (MyDataObject)serializer.Deserialize(fs);
             //Clipboard.SetDataObject(mdo);
             //fs.Close();
-
-            if (serializedObject == null)
+            try
             {
-                LogLine("Oggetto serializzato == null...");
-                return;
+                if (serializedObject == null)
+                {
+                    LogLine("Oggetto serializzato == null...");
+                    return;
+                }
+
+                Clipboard.Clear();
+                Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
+                DataObject dataObject = new DataObject();
+
+                foreach (KeyValuePair<string, object> content in clipboardContents)
+                {
+                    dataObject.SetData(content.Key, content.Value, false);
+                }
+
+                Clipboard.SetDataObject(dataObject, true);
+                serializedObject = null;
+                LogLine("Lettura da stream completata.");
             }
-
-            Clipboard.Clear();
-            Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
-            DataObject dataObject = new DataObject();
-
-            foreach (KeyValuePair<string, object> content in clipboardContents)
+            catch (Exception ex)
             {
-                dataObject.SetData(content.Key, content.Value, false);
+                MessageBox.Show(ex.Message, ex.ToString(), MessageBoxButton.OK, MessageBoxImage.Asterisk);
             }
-
-            Clipboard.SetDataObject(dataObject, true);
-            serializedObject = null;
-            LogLine("Lettura da stream completata.");
         }
 
         private void buttonOk_Click(object sender, RoutedEventArgs e)
@@ -502,7 +508,7 @@ namespace WpfApplication1
             foreach (string format in formats)
             {
                 LogLine("- format: " + format);
-                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents")
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents" && format != "Object Descriptor")
                 {  // formati che danno diversi problemi
                     object obj = ido.GetData(format);
                     if (obj != null && obj.GetType().IsSerializable)
@@ -513,6 +519,8 @@ namespace WpfApplication1
                 else
                     LogLine("\tformato ignorato...");
             }
+
+            //clipboardContents.Remove("Object Descriptor");
 
             if (clipboardContents.Count == 0)
             {
@@ -617,7 +625,6 @@ namespace WpfApplication1
             LogTextBox.AppendText(text + "\n");
             LogTextBox.ScrollToEnd();
         }
-
 
         private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
         {
