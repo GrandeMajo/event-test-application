@@ -393,7 +393,7 @@ namespace WpfApplication1
                 dataObject.SetData(content.Key, content.Value, false);
             }
 
-            Clipboard.SetDataObject(dataObject/*, true*/);
+            Clipboard.SetDataObject(dataObject, true);
             serializedObject = null;
             LogLine("Lettura da stream completata.");
         }
