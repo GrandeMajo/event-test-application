@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -22,6 +23,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using WpfApplication1.Border;
+using Ionic.Zip;
+using System.Diagnostics;
 
 namespace WpfApplication1
 {
@@ -380,7 +383,8 @@ namespace WpfApplication1
             //Clipboard.SetDataObject(mdo);
             //fs.Close();
 
-            if (serializedObject == null) {
+            if (serializedObject == null)
+            {
                 LogLine("Oggetto serializzato == null...");
                 return;
             }
@@ -388,8 +392,9 @@ namespace WpfApplication1
             Clipboard.Clear();
             Dictionary<string, object> clipboardContents = (Dictionary<string, object>)Serializer.ObjectDeserialize(serializedObject);
             DataObject dataObject = new DataObject();
-            
-            foreach (KeyValuePair<string, object> content in clipboardContents) {
+
+            foreach (KeyValuePair<string, object> content in clipboardContents)
+            {
                 dataObject.SetData(content.Key, content.Value, false);
             }
 
@@ -427,6 +432,51 @@ namespace WpfApplication1
             if (string.IsNullOrEmpty(TestTextBox1.Text))
                 return;
 
+            /* Per zippare i file copiati nella clipboard */
+            //Stopwatch watch = Stopwatch.StartNew();
+            //if (Clipboard.ContainsFileDropList())
+            //{
+            //    StringCollection files = Clipboard.GetFileDropList();
+            //    if (files != null)
+            //    {
+            //        string path = "C:\\Users\\Gianluca\\Desktop";
+            //        string tempPath = System.IO.Path.Combine(path, "tmp");
+            //        string zipPath = System.IO.Path.ChangeExtension(tempPath, "zip");
+            //        Directory.CreateDirectory(tempPath);
+            //        MessageBox.Show("pippo");
+            //        foreach (string file in files)
+            //        {
+            //            if ((File.GetAttributes(file) & FileAttributes.Directory) == FileAttributes.Directory)
+            //                DirectoryCopy(file, System.IO.Path.Combine(tempPath, (new DirectoryInfo(file)).Name), true);
+            //            else
+            //                File.Copy(file, System.IO.Path.Combine(tempPath, System.IO.Path.GetFileName(file)));
+            //        }
+            //        System.IO.Compression.ZipFile.CreateFromDirectory(tempPath, zipPath, CompressionLevel.NoCompression, false);
+            //        //long totalBytes = (new FileInfo(zipPath)).Length;
+            //        Directory.Delete(tempPath, true);
+            //    }
+            //}
+            //long elapsedMs = watch.ElapsedMilliseconds;
+            //LogLine("Execution time: " + elapsedMs);
+
+            /* Oppure un altro modo */
+            //Stopwatch watch = Stopwatch.StartNew();
+            //System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
+            //string path = "C:\\Users\\Gianluca\\Desktop";
+            //string tempPath = System.IO.Path.Combine(path, "temp.zip");
+            //using (Ionic.Zip.ZipFile zip = new Ionic.Zip.ZipFile(tempPath)) {
+            //    foreach (string file in files) {
+            //        if ((File.GetAttributes(file) & FileAttributes.Directory) == FileAttributes.Directory)
+            //            zip.AddDirectory(file, (new DirectoryInfo(file)).Name);
+            //        else
+            //            zip.AddFile(file, "");
+            //    }
+            //    zip.Save();
+            //}
+            //watch.Stop();
+            //long elapsedMs = watch.ElapsedMilliseconds;
+            //LogLine("Execution time: " + elapsedMs);
+
             //if (Clipboard.ContainsFileDropList()) {
             //    StringCollection files = Clipboard.GetFileDropList();
             //    if (files != null) {
@@ -440,47 +490,20 @@ namespace WpfApplication1
             //    else MessageBox.Show("niente testo!(1)");
             //}
 
-            //IDataObject data = Clipboard.GetDataObject();
-            //if (data.GetDataPresent("FileNameW"))
-            //{
-            //    string[] files = data.GetData("FileNameW") as string[];
-            //    if (files != null) {
-            //        foreach (string file in files)
-            //            LogLine(file + "\n");
-            //    }
-            //}
-            //else MessageBox.Show("FileNameW non presente...");
-
-            //if (Clipboard.ContainsText(TextDataFormat.Text))
-            //{
-            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            //    BinaryFormatter serializer = new BinaryFormatter();
-            //    string text = Clipboard.GetText(TextDataFormat.Text);
-            //    serializer.Serialize(fs, text);
-            //    fs.Close();
-            //}
-
-
             //PictureBox1.Image = (Image)data.GetData(DataFormats.EnhancedMetafile);
 
             IDataObject ido = Clipboard.GetDataObject();
             string[] formats = ido.GetFormats(false);
-            
+
             if (formats == null || formats.Contains<string>(DataFormats.FileDrop))
                 return;
 
-            //if (formats.Contains<string>("FileContents")) {
-            //    MemoryStream[] contents = (MemoryStream[])ido.GetData("FileContents");
-            //    FileStream fs = new FileStream(System.IO.Path.Combine(currentDirectory, "pippo.txt"), FileMode.Create);
-            //    foreach (MemoryStream content in contents)
-            //        content.CopyTo(fs);
-            //    fs.Close();
-            //}
-
             Dictionary<string, object> clipboardContents = new Dictionary<string, object>();
-            foreach (string format in formats) {
+            foreach (string format in formats)
+            {
                 LogLine("- format: " + format);
-                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents") {  // formati che danno diversi problemi
+                if (format != DataFormats.EnhancedMetafile && format != DataFormats.MetafilePicture && format != "FileContents")
+                {  // formati che danno diversi problemi
                     object obj = ido.GetData(format);
                     if (obj != null && obj.GetType().IsSerializable)
                         clipboardContents.Add(format, obj);
@@ -491,7 +514,8 @@ namespace WpfApplication1
                     LogLine("\tformato ignorato...");
             }
 
-            if (clipboardContents.Count == 0) {
+            if (clipboardContents.Count == 0)
+            {
                 LogLine("Nessun contenuto serializzabile...");
                 return;
             }
@@ -501,6 +525,7 @@ namespace WpfApplication1
             LogLine("Serializzazione su stream eseguita.");
         }
 
+
         private void ClipboardButton_Click(object sender, RoutedEventArgs e)
         {
             IDataObject data = Clipboard.GetDataObject();
@@ -508,17 +533,6 @@ namespace WpfApplication1
 
             foreach (string format in formats)
                 LogLine(format);
-
-            //  Per aggiungere un file alla Clipboard
-            //string file = "D:\\Musica\\The Darkness\\The darkness - Girlfriend.mp3";
-
-            //if (File.Exists(file))
-            //{
-            //    Clipboard.Clear();
-            //    DataObject data = new DataObject();
-            //    data.SetData(DataFormats.FileDrop, new string[] { file });
-            //    Clipboard.SetDataObject(data);
-            //}
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
@@ -597,11 +611,50 @@ namespace WpfApplication1
             LogTextBox.AppendText(text);
             LogTextBox.ScrollToEnd();
         }
-        
+
         private void LogLine(string text)
         {
             LogTextBox.AppendText(text + "\n");
             LogTextBox.ScrollToEnd();
+        }
+
+
+        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            // If the destination directory doesn't exist, create it. 
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = System.IO.Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location. 
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = System.IO.Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+                }
+            }
         }
     }
 }
