@@ -520,8 +520,6 @@ namespace WpfApplication1
                     LogLine("\tformato ignorato...");
             }
 
-            //clipboardContents.Remove("Object Descriptor");
-
             if (clipboardContents.Count == 0)
             {
                 LogLine("Nessun contenuto serializzabile...");
