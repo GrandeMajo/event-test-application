@@ -293,6 +293,15 @@ namespace WpfApplication1
             OEM_CLEAR = 0xFE      //Clear key
         }
 
+        enum DROPEFFECT : uint
+        {
+            DROPEFFECT_NONE = 0,
+            DROPEFFECT_COPY = 1,
+            DROPEFFECT_MOVE = 2,
+            DROPEFFECT_LINK = 4,
+            DROPEFFECT_SCROLL = 0x80000000,
+        }; 
+
         [DllImport("user32.dll", EntryPoint = "keybd_event", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern void keybd_event(byte vk, byte scan, int flags, int extrainfo);
 
@@ -539,6 +548,20 @@ namespace WpfApplication1
 
             foreach (string format in formats)
                 LogLine(format);
+
+            if (data.GetDataPresent("Preferred DropEffect"))
+            {
+                Stream stream = (Stream)data.GetData("Preferred DropEffect");
+                DragDropEffects dropEffect = (DragDropEffects)stream.ReadByte();
+                //if ((dropEffect & (DragDropEffects.Copy | DragDropEffects.Link)) == (DragDropEffects.Copy | DragDropEffects.Link))
+                //    LogLine("(It's a copy operation)");
+                if ((dropEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+                    LogLine("(It's a copy operation)");
+                else if ((dropEffect & DragDropEffects.Move) == DragDropEffects.Move)
+                    LogLine("(It's a move operation)");
+                else
+                    LogLine("Unknown operation)");
+            }
         }
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
